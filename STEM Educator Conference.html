@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Tutors for STEM Learning</title>
+
+  <!-- Titles font (pairs cleanly with Arial) -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ---------- Base / Reset ---------- */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      /* Brand */
+      --primary: #5ba3d0;   /* blue */
+      --secondary: #6bb6db; /* light blue */
+      --accent: #7dd3fc;    /* sky */
+      --success: #4ade80;   /* green */
+      --warning: #fbbf24;   /* yellow */
+      --orange: #ff8b47;    /* orange */
+      --purple: #a78bfa;    /* purple */
+      --gray: #9aa3af;      /* soft gray */
+      --highlight: #ff6b6b; /* red */
+      --panel: #1a2b3d;
+
+      /* Text */
+      --text-primary: #ffffff;
+      --text-secondary: #e0e0e0;
+      --text-muted: rgba(255,255,255,0.7);
+
+      /* Components */
+      --callout-bg: linear-gradient(135deg, rgba(125,211,252,0.25), rgba(91,163,208,0.25));
+      --callout-border: var(--accent);
+
+      /* Layout scale */
+      --container-max: 1320px;
+      --pad-xl: 72px;
+      --pad-lg: 60px;
+      --pad-md: 40px;
+      --gap-xl: 40px;
+      --gap-lg: 32px;
+      --gap-md: 24px;
+      --gap-sm: 16px;
+
+      /* Motion */
+      --transition-fast: 0.3s ease;
+      --transition-medium: 0.5s ease-out;
+      --transition-slow: 0.8s ease-out;
+
+      /* Readable line length */
+      --content-max: 1100px;
+
+      /* Fonts */
+      --title-font: 'Montserrat', Arial, sans-serif;
+      --body-font: Arial, sans-serif;
+
+      --soft-blue: #9cccf0;
+    }
+
+    html { font-size: 18px; } /* global body text size ↑ */
+
+    body {
+      font-family: var(--body-font);
+      background: linear-gradient(135deg, #2d5a7b 0%, #1a3a52 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      overflow: hidden;
+      color: var(--text-secondary);
+    }
+
+    /* ---------- Frame ---------- */
+    .presentation-container {
+      width: min(98vw, var(--container-max));
+      height: min(92vh, 980px); /* Taller stage */
+      background: var(--panel);
+      border-radius: 20px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+      position: relative;
+      overflow: hidden;
+      border: 2px solid rgba(255,255,255,0.1);
+      margin: 0 auto;
+    }
+
+    /* ---------- Slides ---------- */
+    .slide {
+      position: absolute; inset: 0;
+      display: none;
+      padding: var(--pad-xl) var(--pad-xl) calc(var(--pad-xl) + 56px); /* reduced bottom safe area */
+      animation: slideIn var(--transition-medium);
+      overflow: hidden; /* no scroll during live presentation */
+    }
+    .slide.active { display: flex; flex-direction: column; }
+
+    .slide.title-slide {
+      background: linear-gradient(135deg, #2851a3 0%, #3a5f99 100%);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding-bottom: calc(var(--pad-xl) + 50px);
+    }
+
+    /* Compact variant */
+    .slide.compact {
+      padding: var(--pad-lg) var(--pad-lg) calc(var(--pad-lg) + 48px);
+    }
+    .slide.compact .callout { margin-top: var(--gap-md); }
+    .slide.compact .comparison-grid,
+    .slide.compact .chart-container,
+    .slide.compact .process-grid,
+    .slide.compact .insights-grid,
+    .slide.compact .learning-grid,
+    .slide.compact .collaboration-grid { gap: var(--gap-md); }
+    .slide.compact .metric-card { min-height: 150px; padding: 22px; }
+    .slide.compact .collaboration-card { min-height: 130px; padding: 22px; }
+    .slide.compact .process-card { min-height: 110px; padding: 14px; }
+    .slide.compact .evidence-table th,
+    .slide.compact .evidence-table td { padding: 12px 14px; }
+    .slide.compact .intro-text { margin-bottom: var(--gap-sm); font-size: 1.08em; }
+    .slide.compact .slide-header { margin-bottom: var(--gap-md); padding-bottom: 12px; }
+    .slide.compact .bullet-point { font-size: clamp(1.02rem, 1.5vw, 1.2rem); line-height: 1.55; }
+    .slide.compact .metric-value { font-size: clamp(2rem, 3.3vw, 2.8rem); }
+
+    /* ---------- Animations ---------- */
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes fadeInUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes fadeInLeft { from { transform: translateX(-30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideUpFade { to { transform: translateY(0); opacity: 1; } }
+    @keyframes popIn { to { transform: scale(1); } }
+
+    /* ---------- Titles & headers ---------- */
+    .main-title,
+    .slide-header,
+    .slide h3 {
+      font-family: var(--title-font);
+      letter-spacing: 0.2px;
+    }
+
+    .main-title {
+      font-size: clamp(3rem, 5.2vw, 4.3rem);
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      animation: fadeInUp 1s ease-out;
+      line-height: 1.1;
+    }
+    .subtitle {
+      font-size: clamp(1.3rem, 2.1vw, 1.85rem);
+      color: rgba(255,255,255,0.92);
+      margin-bottom: 28px;
+      animation: fadeInUp 1s ease-out 0.15s both;
+      line-height: 1.35;
+      font-family: var(--body-font);
+    }
+    .presenter-info {
+      font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+      color: var(--text-muted);
+      animation: fadeInUp 1s ease-out 0.3s both;
+      line-height: 1.45;
+      font-family: var(--body-font);
+    }
+
+    .slide-header {
+      font-size: clamp(2rem, 3vw, 2.6rem);
+      color: var(--text-primary);
+      margin: 0 auto var(--gap-lg);
+      font-weight: 800;
+      line-height: 1.15;
+      padding-bottom: 14px;
+      border-bottom: 3px solid var(--primary);
+      max-width: var(--content-max);
+    }
+
+    /* ---------- Content container ---------- */
+    .slide-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap-md);
+      position: relative;
+      max-width: var(--content-max);
+      margin: 0 auto;
+      font-family: var(--body-font);
+    }
+
+    /* ---------- Bullets ---------- */
+    .bullet-stack { display: flex; flex-direction: column; gap: 10px; }
+    .bullet-point {
+      display: flex; align-items: flex-start; gap: 12px;
+      font-size: clamp(1.1rem, 1.7vw, 1.35rem);
+      line-height: 1.65;
+      animation: fadeInLeft var(--transition-medium) both;
+      margin: 0;
+      font-family: var(--body-font);
+    }
+    .bullet-sub { padding-left: 28px; opacity: 0.95; }
+    .bullet-point:nth-child(2) { animation-delay: 0.06s; }
+    .bullet-point:nth-child(3) { animation-delay: 0.12s; }
+    .bullet-point:nth-child(4) { animation-delay: 0.18s; }
+    .bullet-point:nth-child(5) { animation-delay: 0.24s; }
+    .bullet-icon { color: var(--secondary); font-size: 1.1em; line-height: 1.2; margin-top: 2px; }
+    .highlight { color: var(--highlight); font-weight: 600; }
+    .star-highlight { color: var(--warning); font-weight: 600; }
+
+    /* ---------- Callouts ---------- */
+    .callout {
+      background: var(--callout-bg);
+      border: 2px solid var(--callout-border);
+      border-radius: 12px;
+      padding: 18px 22px;
+      font-size: 1.06em;
+      line-height: 1.45;
+      margin-top: auto;
+      position: relative;
+      z-index: 10;
+      color: var(--text-secondary);
+      font-family: var(--body-font);
+    }
+    .callout.center { text-align: center; }
+
+    /* ---------- Cards & grids ---------- */
+    .chart-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--gap-lg);
+      margin: var(--gap-md) auto;
+      max-width: var(--content-max);
+      width: 100%;
+    }
+
+    .metric-card {
+      background: rgba(91,163,208,0.1);
+      border: 3px solid var(--primary);
+      border-radius: 15px;
+      padding: 28px;
+      text-align: center;
+      min-height: 190px;
+      display: flex; flex-direction: column; justify-content: center;
+      transform: scale(0);
+      animation: popIn var(--transition-medium) forwards;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+      font-family: var(--body-font);
+    }
+    .metric-card:hover { transform: scale(1.02); box-shadow: 0 10px 30px rgba(91,163,208,0.3); }
+
+    .metric-value {
+      font-size: clamp(2.5rem, 4vw, 3.5rem);
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      font-family: var(--title-font);
+    }
+
+    .metric-label {
+      font-size: clamp(0.95rem, 1.3vw, 1.15rem);
+      color: var(--text-secondary);
+      line-height: 1.3;
+      font-family: var(--body-font);
+    }
+
+    /* ---------- Slide-specific refinements ---------- */
+
+    /* SLIDE 2: bigger & more spread out */
+    .s2-roomy .bullet-stack { gap: 14px; }
+    .s2-roomy .bullet-point { font-size: clamp(1.2rem, 2vw, 1.5rem); line-height: 1.8; }
+    .s2-roomy .bullet-sub { padding-left: 32px; }
+
+    /* SLIDE 5: two top (Welcome narrow + Uncertainty), bottom Feedback centered & narrower */
+    .test-example-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-auto-rows: auto;
+      gap: var(--gap-md);
+      margin-top: var(--gap-md);
+      align-items: start;
+    }
+    .span-2 { grid-column: 1 / -1; }
+    .narrow { max-width: 500px; justify-self: start; } /* forces multi-line wrapping - made wider */
+    .centered-narrow { grid-column: 1 / -1; max-width: 900px; justify-self: center; margin-top: -10px; } /* moved up and wider */
+
+    /* SLIDE 7: explicit border colors for each card */
+    .student-insight .insight-card:nth-child(1){ border-color: var(--primary); }
+    .student-insight .insight-card:nth-child(2){ border-color: var(--warning); }
+    .student-insight .insight-card:nth-child(3){ border-color: var(--orange); }
+    .student-insight .insight-card:nth-child(4){ border-color: var(--success); }
+
+    /* SLIDE 8: process borders — orange, blue, gray, green, yellow, purple */
+    .process-grid .process-card:nth-child(1){ border-color: var(--orange); }
+    .process-grid .process-card:nth-child(2){ border-color: var(--primary); }
+    .process-grid .process-card:nth-child(3){ border-color: var(--gray); }
+    .process-grid .process-card:nth-child(4){ border-color: var(--success); }
+    .process-grid .process-card:nth-child(5){ border-color: var(--warning); }
+    .process-grid .process-card:nth-child(6){ border-color: var(--purple); }
+
+    /* SLIDE 9: testing colors — orange, blue, green, yellow */
+    .testing-metrics .metric-card:nth-child(1){ border-color: var(--orange); }
+    .testing-metrics .metric-card:nth-child(2){ border-color: var(--primary); }
+    .testing-metrics .metric-card:nth-child(3){ border-color: var(--success); }
+    .testing-metrics .metric-card:nth-child(4){ border-color: var(--warning); }
+
+    /* SLIDE 10: pilot uses same colors — orange, blue, green, yellow */
+    .pilot-metrics .metric-card:nth-child(1){ border-color: var(--orange); }
+    .pilot-metrics .metric-card:nth-child(2){ border-color: var(--primary); }
+    .pilot-metrics .metric-card:nth-child(3){ border-color: var(--success); }
+    .pilot-metrics .metric-card:nth-child(4){ border-color: var(--warning); }
+
+    /* SLIDE 12: first card purple; emails soft blue; grants icon toned-down (🏛️) */
+    .join-cards .collaboration-card:nth-child(1){ border-color: var(--purple); }
+    .join-cards .collaboration-card:nth-child(2){ border-color: var(--warning); }
+    .join-cards .collaboration-card:nth-child(3){ border-color: var(--orange); }
+    .join-cards .collaboration-card:nth-child(4){ border-color: var(--success); }
+    .soft-email { color: var(--soft-blue); font-weight: 700; }
+
+    /* ---------- Grids/cards shared ---------- */
+    .process-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap-lg); margin: var(--gap-md) 0; }
+    .process-card {
+      background: linear-gradient(135deg, rgba(91,163,208,0.15), rgba(107,182,219,0.15));
+      border: 3px solid var(--primary);
+      border-radius: 15px;
+      padding: 18px;
+      text-align: center;
+      min-height: 125px;
+      display: flex; flex-direction: column; justify-content: center;
+      position: relative;
+      transform: translateY(20px); opacity: 0; animation: slideUpFade 0.6s ease-out forwards;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+      font-family: var(--body-font);
+    }
+    .process-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(91,163,208,0.3); }
+    .process-icon { font-size: 2.2em; margin-bottom: 10px; color: var(--accent); font-weight: 300; }
+    .process-title { color: var(--accent); font-size: 1.1em; font-weight: 700; margin-bottom: 6px; font-family: var(--title-font); }
+    .process-detail{ color: var(--text-secondary); font-size: 0.98em; line-height: 1.35; }
+
+    .learning-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap-lg); margin: var(--gap-md) auto; max-width: var(--content-max); }
+    .learning-box {
+      background: rgba(91,163,208,0.1);
+      padding: 22px;
+      border-radius: 15px;
+      border: 2px solid var(--success);
+      font-family: var(--body-font);
+    }
+    .learning-box.areas-to-refine { border-color: var(--warning); }
+
+    .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap-lg); margin: var(--gap-md) 0; }
+    .comparison-card {
+      padding: 24px;
+      border: 2px solid var(--primary);
+      border-radius: 15px;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+      background: rgba(91,163,208,0.1);
+      font-family: var(--body-font);
+    }
+    .comparison-card:nth-child(2){ border-color: var(--accent); background: rgba(107,182,219,0.1); }
+    .comparison-card:hover{ transform: translateY(-2px); box-shadow: 0 8px 25px rgba(91,163,208,0.2); }
+    .feature-list { list-style: none; padding: 0; font-size: 1.15em; line-height: 1.6; display: grid; gap: 12px; }
+    .feature-bad { color: var(--highlight); }
+    .feature-good-strong { color: var(--warning); font-weight: 700; }
+
+    .insights-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--gap-lg); margin: var(--gap-md) 0; }
+    .insight-card {
+      background: linear-gradient(135deg, rgba(91,163,208,0.15), rgba(107,182,219,0.15));
+      padding: 26px;
+      border-radius: 15px;
+      text-align: left;
+      border: 3px solid var(--primary);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+      font-family: var(--body-font);
+    }
+    .insight-card h3 { font-family: var(--title-font); margin-bottom: 8px; }
+    .insight-card ul { margin-left: 1em; display: grid; gap: 6px; }
+
+    .collaboration-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: var(--gap-xl); margin: var(--gap-md) auto; max-width: var(--content-max); }
+    .collaboration-card {
+      background: linear-gradient(135deg, rgba(91,163,208,0.15), rgba(107,182,219,0.15));
+      padding: 28px;
+      border-radius: 18px;
+      border: 3px solid var(--primary);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+      min-height: 160px;
+      display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+      font-family: var(--body-font);
+    }
+    .collaboration-card h3 { font-family: var(--title-font); }
+    .collaboration-card:hover{ transform: translateY(-3px); box-shadow: 0 12px 35px rgba(91,163,208,0.3); }
+
+    /* ---------- Tables ---------- */
+    .evidence-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: var(--gap-md) 0;
+      border-radius: 10px; overflow: hidden;
+      font-family: var(--body-font);
+    }
+    .evidence-table th {
+      background: var(--primary);
+      color: var(--text-primary);
+      padding: 16px 18px;
+      text-align: left;
+      font-size: 1.05em;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      font-family: var(--title-font);
+    }
+    .evidence-table td {
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(91,163,208,0.3);
+      font-size: 1.05em;
+      line-height: 1.45;
+    }
+    .evidence-table tr:hover { background: rgba(91,163,208,0.08); transition: background var(--transition-fast); }
+
+    /* ---------- Nav ---------- */
+    .navigation {
+      position: absolute; bottom: 16px; right: 16px;
+      display: flex; gap: 8px; z-index: 100;
+    }
+    .nav-btn {
+      padding: 6px 12px;
+      background: rgba(91,163,208,0.9);
+      color: var(--text-primary);
+      border: none; border-radius: 14px;
+      cursor: pointer; font-size: 0.9rem; font-weight: 700;
+      transition: transform var(--transition-fast), background var(--transition-fast);
+      backdrop-filter: blur(10px);
+      font-family: var(--body-font);
+    }
+    .nav-btn:hover { background: var(--primary); transform: translateY(-1px); }
+    .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+    .nav-btn:focus, .dot:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .slide-indicator {
+      position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 8px; z-index: 90;
+    }
+    .dot {
+      width: 11px; height: 11px; border-radius: 50%;
+      background: rgba(255,255,255,0.35); transition: transform var(--transition-fast), background var(--transition-fast);
+      cursor: pointer;
+    }
+    .dot.active { background: var(--accent); transform: scale(1.25); }
+    .dot:hover { background: var(--secondary); }
+
+    /* ---------- A11y / Prefs ---------- */
+    @media (prefers-contrast: high) {
+      .slide-header { border-bottom-width: 4px; }
+      .metric-card, .process-card, .callout { border-width: 3px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 1100px) {
+      .slide { padding: var(--pad-lg) var(--pad-lg) calc(var(--pad-lg) + 56px); }
+      .slide.compact .comparison-grid,
+      .slide.compact .chart-container,
+      .slide.compact .process-grid,
+      .slide.compact .insights-grid,
+      .slide.compact .learning-grid,
+      .slide.compact .collaboration-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 900px)  { .slide { padding: var(--pad-md) var(--pad-md) calc(var(--pad-md) + 56px); } }
+    @media (max-width: 768px) {
+      .chart-container, .collaboration-grid, .comparison-grid, .insights-grid, .test-example-grid { grid-template-columns: 1fr; gap: var(--gap-md); }
+      .learning-grid, .process-grid { grid-template-columns: 1fr; }
+      .metric-card { min-height: 150px; padding: 22px; }
+      .collaboration-card { min-height: 130px; padding: 22px; }
+      .callout { font-size: 1.0em; padding: 16px 18px; }
+      .navigation { bottom: 12px; right: 12px; gap: 6px; }
+      .narrow, .centered-narrow { max-width: 100%; }
+    }
+
+    /* ---------- Print ---------- */
+    @media print {
+      body { background: #fff; }
+      .presentation-container { box-shadow: none; border: 1px solid #ccc; height: auto; }
+      .slide {
+        display: block !important;
+        page-break-after: always;
+        background: #fff !important; color: #000 !important;
+        padding: 32px 32px 40px !important;
+        overflow: visible !important;
+      }
+      .navigation, .slide-indicator { display: none !important; }
+      .slide-header { color: #000 !important; border-color: #000 !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="presentation-container">
+    <!-- 1. TITLE -->
+    <div class="slide title-slide active">
+      <h1 class="main-title">Designing AI Tutors for STEM Learning</h1>
+      <p class="subtitle">Translating Evidence-Based Practice into Scalable Precalculus Support</p>
+      <div class="presenter-info">
+        <p>April Crenshaw &amp; David Escalante Gonzalez</p>
+        <p>Chattanooga State Community College</p>
+        <p style="margin-top: 16px; font-size: 0.92em;">STEM Educators Conference • September 23, 2025</p>
+      </div>
+    </div>
+
+    <!-- 2. CHALLENGE (roomier) -->
+    <div class="slide s2-roomy">
+      <h2 class="slide-header">The Challenge We Are Facing</h2>
+      <div class="slide-content">
+        <div class="bullet-stack">
+          <div class="bullet-point"><span class="bullet-icon">▶</span><span><span class="highlight">15% of first-year students</span> took remedial math in 2019–20¹</span></div>
+          <div class="bullet-point"><span class="bullet-icon">▶</span><span>Only <span class="highlight">1 in 8 students</span> use tutoring services²</span></div>
+          <div class="bullet-point bullet-sub"><span class="bullet-icon">•</span><span><span class="highlight">66% believe they do not need help</span>; 27% cite lack of time³</span></div>
+          <div class="bullet-point bullet-sub"><span class="bullet-icon">•</span><span>Barriers to help-seeking: <span class="highlight">stigma, fear, negative past experiences</span>⁴</span></div>
+          <div class="bullet-point"><span class="bullet-icon">▶</span><span>Online course completion <span class="highlight">7–20 percentage points lower</span> than face-to-face⁵</span></div>
+          <div class="bullet-point bullet-sub"><span class="bullet-icon">•</span><span>Widens equity gaps: White-Black completion gap <span class="highlight">grows by ~5pp</span>⁶</span></div>
+        </div>
+
+        <div class="callout">
+          <strong>Sources:</strong> ¹NCES (2024); ²Mowreader (2025); ³Czyz et al. (2013); ⁴Winograd &amp; Rust (2014); ⁵Hachey et al. (2022); ⁶Xu &amp; Xu (2019)
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. COMPARISON (COMPACT) -->
+    <div class="slide compact">
+      <h2 class="slide-header">From Live Embedded Tutors to 24/7 AI Support</h2>
+      <div class="slide-content">
+        <div class="comparison-grid">
+          <div class="comparison-card">
+            <h3 style="color: var(--primary); margin-bottom:14px; font-size:1.3em; font-weight:800;">Previous: Live Embedded Tutors</h3>
+            <ul class="feature-list">
+              <li>✓ Dedicated support hours</li>
+              <li>✓ Virtual &amp; in-person via Teams</li>
+              <li>✓ Weekly encouragement messages</li>
+              <li>✓ Access to HW and quizzes</li>
+              <li class="feature-bad">✗ Limited availability</li>
+              <li class="feature-bad">✗ Scheduling conflicts</li>
+              <li class="feature-bad">✗ Scalability challenges</li>
+            </ul>
+          </div>
+          <div class="comparison-card">
+            <h3 style="color: var(--accent); margin-bottom:14px; font-size:1.3em; font-weight:800;">Now: AI Embedded Assistant</h3>
+            <ul class="feature-list">
+              <li class="feature-good-strong">★ 24/7 availability</li>
+              <li class="feature-good-strong">★ Instant response time</li>
+              <li>✓ Same scaffolded support</li>
+              <li>✓ Culturally responsive</li>
+              <li>✓ LMS integration (coming soon)</li>
+              <li>✓ Unlimited student capacity</li>
+              <li>✓ Consistent quality</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout center">
+          <strong style="color: var(--text-primary); font-size:1.08em;">Key Innovation:</strong>
+          <span> Preserving embedded tutoring strengths while removing access barriers</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. EVIDENCE -->
+    <div class="slide">
+      <h2 class="slide-header">Built on Proven Evidence-Based Practices</h2>
+      <div class="slide-content">
+        <table class="evidence-table">
+          <thead>
+            <tr>
+              <th>Practice</th>
+              <th>Implementation</th>
+              <th>Research Impact</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color: var(--accent);">Scaffolding</strong></td>
+              <td>Break problems into manageable steps</td>
+              <td>Improves task success &amp; independence<br/><em>(van de Pol et al., 2010)</em></td>
+            </tr>
+            <tr>
+              <td><strong style="color: var(--accent);">Formative Feedback</strong></td>
+              <td>Immediate, specific guidance</td>
+              <td>Strengthens learning &amp; self-regulation<br/><em>(Hattie &amp; Timperley, 2007; Shute, 2008)</em></td>
+            </tr>
+            <tr>
+              <td><strong style="color: var(--accent);">Embedded Tutoring</strong></td>
+              <td>Support within coursework</td>
+              <td>Boosts engagement &amp; persistence<br/><em>(Duffy &amp; Burkander, 2024)</em></td>
+            </tr>
+            <tr>
+              <td><strong style="color: var(--accent);">Culturally Responsive</strong></td>
+              <td>Asset-based language</td>
+              <td>Higher achievement &amp; belonging<br/><em>(Ladson-Billings, 2014; Gay, 2018)</em></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 5. TESTING EXAMPLES (COMPACT) — Welcome (wider) + Uncertainty, then Feedback centered & wider/higher -->
+    <div class="slide compact">
+      <h2 class="slide-header">Early Testing with Students</h2>
+      <div class="slide-content">
+        <div class="test-example-grid">
+          <!-- Top-left: WELCOMING INTRO (wider, first) -->
+          <div class="test-example-container narrow" style="padding:18px; border:2px solid var(--primary); border-radius: 12px; background: rgba(91,163,208,0.05);">
+            <h3 style="color: var(--accent); margin-bottom:10px; font-size:1.1em;">Welcoming Introduction</h3>
+            <div style="background: rgba(0,0,0,0.2); padding:12px; border-radius:10px; font-size:1.02em; line-height:1.5;">
+              <p style="margin-bottom:6px;"><strong style="color: var(--secondary);">Student:</strong> "I need help with a precalculus problem."</p>
+              <p style="margin-bottom:6px;"><strong style="color: var(--primary);">AI:</strong> "I'm here to help. What specific problem are you working on? We can work through it step by step—the way Dr. Crenshaw models in class."</p>
+              <p style="color: var(--success); font-weight:700;">✓ Shows: Culturally responsive pedagogy, asset-based approach</p>
+            </div>
+          </div>
+
+          <!-- Top-right: UNCERTAINTY -->
+          <div class="test-card" style="padding:16px; border:2px solid var(--secondary); border-radius: 12px; background: rgba(107,182,219,0.05);">
+            <h3 style="color: var(--accent); margin-bottom:8px; font-size:1.08em;">Handling Student Uncertainty</h3>
+            <div style="background: rgba(0,0,0,0.2); padding:12px; border-radius:10px; font-size:1.02em; line-height:1.42;">
+              <p style="margin-bottom:4px;"><strong style="color: var(--secondary);">Student:</strong> "idk"</p>
+              <p style="margin-bottom:4px;"><strong style="color: var(--primary);">AI:</strong> "Totally okay—this boundary-check trips many students. Let's focus on one question: Is 8 ≥ 3?"</p>
+              <p style="color: var(--success); font-weight:700;">✓ Shows: Scaffolding, normalizing struggle</p>
+            </div>
+          </div>
+
+          <!-- Second row: FEEDBACK (centered, wider and moved up) -->
+          <div class="test-card centered-narrow" style="padding:18px; border:2px solid var(--accent); border-radius: 12px; background: rgba(125,211,252,0.05);">
+            <h3 style="color: var(--accent); margin-bottom:8px; font-size:1.08em; text-align:center;">Formative Feedback</h3>
+            <div style="background: rgba(0,0,0,0.2); padding:14px; border-radius:10px; font-size:1rem; line-height:1.5;">
+              <p style="margin-bottom:6px;"><strong style="color: var(--primary);">AI:</strong> "Good. Final check: Does 21 &gt; 14 hold true? a) Yes b) No"</p>
+              <p style="margin-bottom:6px; color: #ff69b4; font-weight:700;">Oops!</p>
+              <p style="margin-bottom:6px; font-size:0.98em;">"We've reviewed your course materials—homework, quizzes, and syllabi. These confirm your course covers exactly the types of problems we've been working on. You've been practicing step-by-step, isolating variables, and checking signs carefully—exactly the process Dr. Crenshaw emphasizes. Do you want to keep working on absolute value inequalities or switch to another type from your HW 1 Practice Sheet?"</p>
+              <p style="color: var(--success); font-weight:700;">✓ Shows: Course alignment, formative feedback, practice options</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. WHAT WE'RE LEARNING -->
+    <div class="slide">
+      <h2 class="slide-header">What We Are Learning So Far</h2>
+      <div class="slide-content">
+        <div class="learning-grid">
+          <div class="learning-box">
+            <h3 style="color: var(--success); margin-bottom:10px; font-size:1.22em;">✓ Promising Results</h3>
+            <ul style="list-style:none; display:grid; gap:8px; font-size:1.15em; line-height:1.6;">
+              <li>• Warm, personalized greetings</li>
+              <li>• Affirming, asset-based language</li>
+              <li>• <span style="color: var(--accent); font-weight: 700;">98% mathematical accuracy</span></li>
+              <li>• Effective scaffolding (when consistent)</li>
+              <li>• References instructor methods</li>
+              <li>• Offers to work similar problems</li>
+            </ul>
+          </div>
+          <div class="learning-box areas-to-refine">
+            <h3 style="color: var(--warning); margin-bottom:10px; font-size:1.22em;">⚠ Areas to Refine</h3>
+            <ul style="list-style:none; display:grid; gap:8px; font-size:1.15em; line-height:1.6;">
+              <li>• Sometimes gives answer immediately</li>
+              <li>• Gives praise for incorrect responses</li>
+              <li>• Inconsistent response patterns</li>
+              <li>• May skip scaffolding steps</li>
+              <li>• Inappropriate praise timing</li>
+              <li>• Variable pacing of support</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout center">
+          <strong style="color: var(--text-primary);">We are on the right track, but systematic refinement is needed before scaling</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. STUDENT INSIGHT (updated content with bigger text) -->
+    <div class="slide student-insight">
+      <h2 class="slide-header">Student Insight</h2>
+      <div class="slide-content">
+        <div class="insights-grid">
+          <div class="insight-card">
+            <h3 style="color: var(--text-primary); font-size:1.3em;">Interest</h3>
+            <ul style="font-size: 1.2em;">
+              <li>I like building something that actually helps my classmates.</li>
+              <li>Working with AI to build this tutor has been a good challenge.</li>
+            </ul>
+          </div>
+          <div class="insight-card">
+            <h3 style="color: var(--text-primary); font-size:1.3em;">Observed Strengths</h3>
+            <ul style="font-size: 1.2em;">
+              <li>Dr. Crenshaw is building it to work like a real tutor for multiple math courses.</li>
+            </ul>
+          </div>
+          <div class="insight-card">
+            <h3 style="color: var(--text-primary); font-size:1.3em;">Concerns</h3>
+            <ul style="font-size: 1.2em;">
+              <li>Her original prompt is very long, so it will burn through tokens fast.</li>
+              <li>We need to trim it down so it doesn't get too expensive.</li>
+            </ul>
+          </div>
+          <div class="insight-card">
+            <h3 style="color: var(--text-primary); font-size:1.3em;">Contribution</h3>
+            <ul style="font-size: 1.2em;">
+              <li>I am helping break the prompt into four modules and making edits in OpenAI instead of ChatGPT so Dr. Crenshaw can customize it exactly how she plans.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. PROCESS (COMPACT + new colors) -->
+    <div class="slide compact">
+      <h2 class="slide-header">Our Process Moving Forward</h2>
+      <div class="slide-content">
+        <div class="process-grid">
+          <div class="process-card"><div class="process-icon">①</div><div class="process-title">Design</div><div class="process-detail">Create pedagogical framework</div></div>
+          <div class="process-card"><div class="process-icon">②</div><div class="process-title">Write</div><div class="process-detail">1500+ word prompts</div></div>
+          <div class="process-card"><div class="process-icon">③</div><div class="process-title">Accuracy Test</div><div class="process-detail">Solve 25+ problems<br/>95% accuracy required</div></div>
+          <div class="process-card"><div class="process-icon">④</div><div class="process-title">Personas</div><div class="process-detail">Test diverse profiles</div></div>
+          <div class="process-card"><div class="process-icon">⑤</div><div class="process-title">Context</div><div class="process-detail">Validate edge cases</div></div>
+          <div class="process-card"><div class="process-icon">⑥</div><div class="process-title">Iterate</div><div class="process-detail">2+ refinement cycles</div></div>
+        </div>
+
+        <div class="callout center">
+          <strong style="font-size:1.05em; color: var(--accent);">Critical Components:</strong>
+          <span> Course syllabus • Learning objectives • Pedagogical consistency</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. TESTING (new title + colors) -->
+    <div class="slide">
+      <h2 class="slide-header">Testing for Quality and Equity</h2>
+      <div class="slide-content">
+        <div class="chart-container testing-metrics">
+          <div class="metric-card"><div class="metric-value">25</div><div class="metric-label">Precalculus Problems<br/>All Course Topics</div></div>
+          <div class="metric-card"><div class="metric-value">5</div><div class="metric-label">Student Personas<br/>Diverse Backgrounds</div></div>
+          <div class="metric-card"><div class="metric-value" style="color: var(--success);">95%</div><div class="metric-label">Required Accuracy<br/>Mathematical Content</div></div>
+          <div class="metric-card"><div class="metric-value" style="color: var(--warning);">0</div><div class="metric-label">Tolerance for<br/>Deficit Language</div></div>
+        </div>
+
+        <div class="callout center" style="font-size:1.02em;">
+          <strong>Testing personas include:</strong> Underprepared • Math-anxious • Returning adult • Time-pressed • English learner
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. PILOT (COMPACT, same colors as slide 9, larger intro text) -->
+    <div class="slide compact">
+      <h2 class="slide-header">Pilot Study — Fall 2025 and Spring 2026</h2>
+      <div class="slide-content">
+        <div class="intro-text" style="font-size: 1.25em; margin-bottom: var(--gap-sm);">Two online Math 1710 courses • Starting October 2025 (2nd 7 weeks) and Spring 2026</div>
+        <div class="chart-container pilot-metrics">
+          <div class="metric-card"><div class="metric-value">≥60%</div><div class="metric-label">Weekly Student<br/>Engagement Target</div></div>
+          <div class="metric-card"><div class="metric-value">+7pp</div><div class="metric-label">Homework Completion<br/>Improvement Goal</div></div>
+          <div class="metric-card"><div class="metric-value">+7pp</div><div class="metric-label">Quiz Completion<br/>Improvement Goal</div></div>
+          <div class="metric-card"><div class="metric-value" style="color: var(--accent);">&lt;1pp</div><div class="metric-label">Achievement Gap<br/>Expansion Limit*</div></div>
+        </div>
+        <div class="callout">
+          <p style="margin:0; font-size:1.02em;"><strong>*Achievement Gap Goal:</strong> Ensure no widening of existing gaps between demographic groups</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11. BEYOND -->
+    <div class="slide">
+      <h2 class="slide-header">Beyond Precalculus — The Broader Vision</h2>
+      <div class="slide-content">
+        <div style="padding:20px; background: rgba(91,163,208,0.1); border-radius:15px; border:2px solid var(--primary); margin-bottom:var(--gap-md);">
+          <h3 style="color: var(--accent); margin-bottom:12px; font-size:1.25em; text-align:center; font-family: var(--title-font);">This Approach Is Not Limited to Math</h3>
+          <p style="font-size:1.08em; text-align:center; margin-bottom:16px;">While we are starting with precalculus, the core principles apply across STEM disciplines</p>
+          <div style="display:grid; grid-template-columns: repeat(2,1fr); gap:var(--gap-md);">
+            <div style="background: rgba(0,0,0,0.2); padding:16px; border-radius:10px; border:2px solid var(--secondary);">
+              <strong style="color: var(--accent); font-size:1.05em; font-family: var(--title-font);">Getting Started Suggestions:</strong>
+              <ul style="margin-top:8px; padding-left:18px; display:grid; gap:8px; font-size:1.02em; line-height:1.5;">
+                <li>Begin with your course syllabus</li>
+                <li>Document your teaching methods</li>
+                <li>Test with real problems</li>
+                <li>Iterate based on student feedback</li>
+              </ul>
+            </div>
+            <div style="background: rgba(0,0,0,0.2); padding:16px; border-radius:10px; border:2px solid var(--accent);">
+              <strong style="color: var(--accent); font-size:1.05em; font-family: var(--title-font);">Potential Applications:</strong>
+              <ul style="margin-top:8px; padding-left:18px; display:grid; gap:8px; font-size:1.02em; line-height:1.5;">
+                <li>Chemistry: Lab procedures, reactions</li>
+                <li>Physics: Problem-solving sequences</li>
+                <li>Biology: Concept explanations</li>
+                <li>Engineering: Design processes</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout center">
+          <strong>Key Insight:</strong> Any course with consistent pedagogical approaches can benefit from this model
+        </div>
+      </div>
+    </div>
+
+    <!-- 12. COLLABORATION (new title) -->
+    <div class="slide compact">
+      <h2 class="slide-header">Sharing & Expanding Our Collaboration</h2>
+      <div class="slide-content">
+        <div class="collaboration-grid join-cards">
+          <div class="collaboration-card">
+            <h3 style="color: var(--text-primary); margin-bottom:10px; font-size:1.22em;">📚 Publications</h3>
+            <p style="font-size:1.15em;"><strong>Prompt Book Chapter:</strong> Implementation guide coming Spring 2026</p>
+          </div>
+          <div class="collaboration-card">
+            <h3 style="color: var(--text-primary); margin-bottom:10px; font-size:1.22em;">🎤 Conferences</h3>
+            <p style="font-size:1.15em;"><strong>ATD Dream 2026:</strong> Sharing pilot results</p>
+          </div>
+          <div class="collaboration-card">
+            <h3 style="color: var(--text-primary); margin-bottom:10px; font-size:1.22em;">🤝 Leadership</h3>
+            <p style="font-size:1.15em;"><strong>TN Board of Regents:</strong> Leading AI Community of Practice</p>
+          </div>
+          <div class="collaboration-card">
+            <h3 style="color: var(--text-primary); margin-bottom:10px; font-size:1.22em;">🏛️ Grants</h3>
+            <p style="font-size:1.15em;"><strong>Seeking grant funding</strong> for API tokens</p>
+          </div>
+        </div>
+
+        <div class="callout center" style="padding:20px;">
+          <p style="font-size:1.2em; color: var(--text-primary); margin-bottom:8px;"><strong>We're at the beginning — join us to shape this together!</strong></p>
+          <p style="font-size:1.12em;">
+            <span class="soft-email">april.crenshaw@chattanoogastate.edu</span> •
+            <span class="soft-email">david.escalante@chattanoogastate.edu</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 13. Q&A -->
+    <div class="slide title-slide">
+      <h1 class="main-title" style="font-size:3.2em; margin-bottom:28px;">Questions and Discussion</h1>
+      <div style="max-width:800px; margin:0 auto;">
+        <p style="font-size:1.4em; color: rgba(255,255,255,0.95); margin-bottom:38px; font-weight:300; font-family: var(--body-font);">Let's explore how AI tutoring can transform your STEM courses</p>
+        <div style="display:grid; grid-template-columns: repeat(3,1fr); gap:var(--gap-lg);">
+          <div style="background: rgba(255,255,255,0.1); padding:26px; border-radius:15px; backdrop-filter: blur(10px); transition: all var(--transition-fast); border:2px solid var(--primary); cursor: pointer;"
+               onmouseover="this.style.transform='translateY(-4px)'; this.style.background='rgba(255,255,255,0.15)'"
+               onmouseout="this.style.transform='translateY(0)'; this.style.background='rgba(255,255,255,0.1)'">
+            <div style="font-size:2.2em; margin-bottom:10px; filter: brightness(1.2);">🎯</div>
+            <p style="font-size:1.02em; font-weight:600;">Implementation<br/>Challenges</p>
+          </div>
+          <div style="background: rgba(255,255,255,0.1); padding:26px; border-radius:15px; backdrop-filter: blur(10px); transition: all var(--transition-fast); border:2px solid var(--accent); cursor: pointer;"
+               onmouseover="this.style.transform='translateY(-4px)'; this.style.background='rgba(255,255,255,0.15)'"
+               onmouseout="this.style.transform='translateY(0)'; this.style.background='rgba(255,255,255,0.1)'">
+            <div style="font-size:2.2em; margin-bottom:10px; filter: brightness(1.2);">🔬</div>
+            <p style="font-size:1.02em; font-weight:600;">Discipline-Specific<br/>Adaptations</p>
+          </div>
+          <div style="background: rgba(255,255,255,0.1); padding:26px; border-radius:15px; backdrop-filter: blur(10px); transition: all var(--transition-fast); border:2px solid var(--secondary); cursor: pointer;"
+               onmouseover="this.style.transform='translateY(-4px)'; this.style.background='rgba(255,255,255,0.15)'"
+               onmouseout="this.style.transform='translateY(0)'; this.style.background='rgba(255,255,255,0.1)'">
+            <div style="font-size:2.2em; margin-bottom:10px; filter: brightness(1.2);">🤝</div>
+            <p style="font-size:1.02em; font-weight:600;">Collaboration<br/>Opportunities</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="navigation">
+      <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">Previous</button>
+      <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next</button>
+    </div>
+    <div class="slide-indicator" id="slideIndicator"></div>
+  </div>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+
+    function createIndicators() {
+      const indicator = document.getElementById('slideIndicator');
+      for (let i = 0; i < totalSlides; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        if (i === 0) dot.classList.add('active');
+        dot.onclick = () => goToSlide(i);
+        indicator.appendChild(dot);
+      }
+    }
+
+    function updateSlide() {
+      slides.forEach((slide, idx) => slide.classList.toggle('active', idx === currentSlide));
+      const dots = document.querySelectorAll('.dot');
+      dots.forEach((dot, idx) => dot.classList.toggle('active', idx === currentSlide));
+      document.getElementById('prevBtn').disabled = currentSlide === 0;
+      document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+    }
+
+    function changeSlide(dir) {
+      currentSlide = Math.max(0, Math.min(totalSlides - 1, currentSlide + dir));
+      updateSlide();
+    }
+
+    function goToSlide(index) {
+      currentSlide = index;
+      updateSlide();
+    }
+
+    // Keyboard nav
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') changeSlide(-1);
+      if (e.key === 'ArrowRight') changeSlide(1);
+      if (e.key === 'Home') goToSlide(0);
+      if (e.key === 'End') goToSlide(totalSlides - 1);
+    });
+
+    // Touch/swipe
+    let touchStartX = 0, touchEndX = 0;
+    document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive:true});
+    document.addEventListener('touchend',   e => { touchEndX = e.changedTouches[0].screenX; handleSwipe(); }, {passive:true});
+    function handleSwipe() {
+      if (touchEndX < touchStartX - 50) changeSlide(1);
+      if (touchEndX > touchStartX + 50) changeSlide(-1);
+    }
+
+    // Fullscreen toggle (press "f")
+    document.addEventListener('keydown', async (e) => {
+      if (e.key.toLowerCase() === 'f') {
+        if (!document.fullscreenElement) {
+          try { await document.documentElement.requestFullscreen(); } catch (_) {}
+        } else {
+          document.exitFullscreen();
+        }
+      }
+    });
+
+    // Prevent page scroll behind the deck
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+
+    // Init
+    createIndicators();
+    updateSlide();
+    setTimeout(() => { slides.forEach(s => s.style.transition = 'all 0.5s ease-out'); }, 100);
+  </script>
+</body>
+</html>
