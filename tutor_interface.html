@@ -1,0 +1,1428 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>MATH 1710 Learning Assistant — Dr. Crenshaw • Chattanooga State</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AI-powered tutoring for MATH 1710 Precalculus students" />
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════════
+       COLOR PALETTE & DESIGN SYSTEM
+       To change colors: edit the variables below
+       ═══════════════════════════════════════════════════════════════ */
+    :root {
+      /* Primary colors - Blue theme for academic feel */
+      --blue-dark: #1e40af;    /* Dark blue for header */
+      --blue-medium: #2563eb;  /* Medium blue for accents */
+      --blue-light: #93c5fd;   /* Light blue for borders */
+      --blue-bg: #dbeafe;      /* Very light blue for AI messages */
+
+      /* Accent colors */
+      --orange: #f59e0b;       /* Warning/alert orange */
+      --orange-dark: #d97706;  /* Darker orange for borders */
+      --green: #10b981;        /* Success green */
+      --green-dark: #059669;   /* Darker green for hover */
+      --red: #ef4444;          /* Error red */
+
+      /* Neutral colors */
+      --text-dark: #111827;    /* Main text */
+      --text-medium: #6b7280;  /* Muted text */
+      --bg-white: #ffffff;     /* White backgrounds */
+      --bg-gray: #f9fafb;      /* Light gray backgrounds */
+      --border: #e5e7eb;       /* Border color */
+      --shadow: rgba(0,0,0,.08); /* Soft shadows */
+
+      /* UI settings */
+      --radius: 14px;          /* Border radius */
+      --spacing: 16px;         /* Standard spacing */
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       RESET & BASE STYLES
+       ═══════════════════════════════════════════════════════════════ */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, var(--blue-dark) 0%, #1e293b 100%);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 12px;
+      padding-top: 8px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 8px;
+        padding-top: 4px;
+      }
+    }
+
+    /* Main container */
+    .container {
+      background: var(--bg-white);
+      border-radius: 20px;
+      max-width: 960px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      overflow: hidden;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       HEADER SECTION
+       ═══════════════════════════════════════════════════════════════ */
+    .header {
+      background: linear-gradient(135deg, var(--blue-medium), var(--blue-dark));
+      color: white;
+      text-align: center;
+      padding: 14px var(--spacing);
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+
+    .header p {
+      font-size: 18px;
+      font-weight: 400;
+      opacity: 0.98;
+      margin-bottom: 2px;
+      line-height: 1.3;
+      margin-top: 6px;
+    }
+
+    .header p.institution {
+      font-size: 15px;
+      font-weight: 400;
+      opacity: 0.95;
+      line-height: 1.3;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       STATUS BAR (Online indicator + action buttons)
+       ═══════════════════════════════════════════════════════════════ */
+    .status {
+      background: linear-gradient(90deg, var(--blue-medium), var(--blue-dark));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      font-weight: 600;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 14px;
+    }
+
+    .status-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Pulsing online indicator */
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 10px rgba(16,185,129,.8);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       BUTTONS - Various styles
+       ═══════════════════════════════════════════════════════════════ */
+    .btn {
+      padding: 7px 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    /* Button variants */
+    .btn-dark {
+      background: #111827;
+      color: white;
+      border: 1px solid #374151;
+    }
+
+    .btn-orange {
+      background: var(--orange);
+      color: #1f2937;
+      border: 1px solid var(--orange-dark);
+    }
+
+    .btn-ghost {
+      background: white;
+      color: var(--blue-dark);
+      border: 2px solid var(--blue-dark);
+    }
+
+    .btn-send {
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      color: white;
+      padding: 12px 18px;
+      font-weight: 800;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       MAIN LAYOUT - Chat area + Sidebar
+       ═══════════════════════════════════════════════════════════════ */
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 12px;
+      padding: 10px;
+    }
+
+    /* Responsive: stack on small screens */
+    @media (max-width: 900px) {
+      .main {
+        grid-template-columns: 1fr;
+      }
+
+      .chat {
+        height: 400px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        padding: 10px 12px;
+      }
+
+      .header h1 {
+        font-size: 19px;
+        margin-bottom: 3px;
+      }
+
+      .header p {
+        font-size: 14px;
+        margin-bottom: 1px;
+      }
+
+      .header p.institution {
+        font-size: 13px;
+      }
+
+      .status {
+        padding: 6px 10px;
+        font-size: 13px;
+      }
+
+      .main {
+        padding: 8px;
+        gap: 8px;
+      }
+
+      .panel, .side {
+        padding: 10px;
+      }
+
+      .chat {
+        height: 450px;
+      }
+
+      .compose {
+        grid-template-columns: 1fr;
+      }
+
+      .btn-send {
+        width: 100%;
+      }
+
+      .bubble {
+        font-size: 14px;
+      }
+    }
+
+    .panel {
+      background: var(--bg-gray);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       CHAT AREA - Message display
+       ═══════════════════════════════════════════════════════════════ */
+    .chat {
+      height: 420px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      padding-right: 4px; /* Space for scrollbar */
+    }
+
+    /* Scrollbar styling (webkit browsers) */
+    .chat::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .chat::-webkit-scrollbar-track {
+      background: var(--bg-gray);
+      border-radius: 4px;
+    }
+
+    .chat::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    .chat::-webkit-scrollbar-thumb:hover {
+      background: var(--text-medium);
+    }
+
+    /* Individual message */
+    .msg {
+      display: flex;
+      gap: 6px;
+      margin: 6px 0;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .msg:first-child {
+      margin-top: 0;
+    }
+
+    .msg:last-child {
+      margin-bottom: 0;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Avatar circle */
+    .who {
+      flex: 0 0 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: white;
+      font-size: 16px;
+      box-shadow: 0 1px 4px var(--shadow);
+    }
+
+    .assistant .who {
+      background: white;
+      color: #f97316;
+    }
+
+    .user .who {
+      background: white;
+      color: #2563eb;
+    }
+
+    /* Message bubble */
+    .bubble {
+      max-width: 75%;
+      padding: 8px 10px;
+      border-radius: 12px;
+      white-space: pre-wrap;
+      line-height: 1.45;
+      box-shadow: 0 1px 3px var(--shadow);
+      word-wrap: break-word;
+      font-size: 15px;
+    }
+
+    .assistant .bubble {
+      background: var(--blue-bg);
+      border: 2px solid var(--blue-light);
+      color: var(--text-dark);
+    }
+
+    .user .bubble {
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      color: white;
+    }
+
+    /* Images in messages */
+    .bubble img {
+      max-width: 100%;
+      border-radius: 10px;
+      margin-top: 8px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       QUICK CHOICE BUTTONS (A/B/C/D, Hint, Why)
+       ═══════════════════════════════════════════════════════════════ */
+    .choices {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .chip {
+      background: #1f2937;
+      color: white;
+      border: 1px solid #374151;
+      padding: 6px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .chip:hover:not([disabled]) {
+      background: #374151;
+      transform: translateY(-1px);
+    }
+
+    .chip:active:not([disabled]) {
+      transform: translateY(0);
+    }
+
+    .chip[disabled] {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Calculator button - bright orange background */
+    #calcBtn {
+      background: #f97316;
+      color: white;
+      border: 1px solid #ea580c;
+    }
+
+    #calcBtn:hover {
+      background: #ea580c;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       MESSAGE INPUT AREA
+       ═══════════════════════════════════════════════════════════════ */
+    .compose {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .text {
+      padding: 10px 12px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 15px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    .text:focus {
+      outline: none;
+      border-color: var(--blue-medium);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       SIDEBAR - Settings & Controls
+       ═══════════════════════════════════════════════════════════════ */
+    .side {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+    }
+
+    .label {
+      font-size: 11px;
+      font-weight: 800;
+      color: #374151;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    select, input[type="file"], input[type="text"] {
+      width: 100%;
+      padding: 9px 11px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      background: white;
+      color: var(--text-dark);
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--blue-medium);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* Image preview */
+    .preview {
+      display: none;
+      margin-top: 8px;
+    }
+
+    .preview img {
+      max-width: 100%;
+      border-radius: 10px;
+      border: 3px solid var(--border);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       MODAL - For reporting issues
+       ═══════════════════════════════════════════════════════════════ */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      max-width: 560px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 16px;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--blue-medium);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       TOAST NOTIFICATION - Temporary messages
+       ═══════════════════════════════════════════════════════════════ */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111827;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 999px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 2000;
+      box-shadow: 0 4px 12px rgba(0,0,0,.3);
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       ACCESSIBILITY - Skip navigation link
+       ═══════════════════════════════════════════════════════════════ */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--blue-dark);
+      color: white;
+      padding: 8px 16px;
+      text-decoration: none;
+      font-weight: 700;
+      z-index: 3000;
+      border-radius: 0 0 8px 0;
+    }
+
+    .skip-link:focus {
+      top: 0;
+      outline: 3px solid var(--orange);
+      outline-offset: 2px;
+    }
+
+    /* Screen reader only text */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       UTILITY CLASSES
+       ═══════════════════════════════════════════════════════════════ */
+    .mt-10 { margin-top: 8px; }
+    .mt-12 { margin-top: 10px; }
+    .mb-8 { margin-bottom: 6px; }
+    .mb-10 { margin-bottom: 8px; }
+    .w-full { width: 100%; }
+  </style>
+</head>
+
+<body>
+  <!-- Skip navigation for keyboard users -->
+  <a href="#chat" class="skip-link">Skip to chat</a>
+
+  <div class="container">
+    <!-- ═══════════════════════════════════════════════════════════
+         HEADER - Course title and instructor
+         ═══════════════════════════════════════════════════════════ -->
+    <header class="header">
+      <h1>Math 1710 Precalculus Learning Assistant</h1>
+      <p>Chattanooga State Community College</p>
+      <p class="institution">Dr. April Crenshaw, Associate Professor</p>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         STATUS BAR - Online status and quick actions
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="status">
+      <div class="status-left">
+        <span class="dot" id="statusDot" aria-label="Online status"></span>
+        <span id="statusText">Online & Ready</span>
+      </div>
+      <div class="actions">
+        <!-- Link to Math Center (opens in new tab) -->
+        <a class="btn btn-ghost"
+           href="https://chattanoogastate.edu/mathematics-sciences/math-center"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Schedule Math Center appointment">
+          <span aria-hidden="true">📅</span>
+          <span>Math Center</span>
+        </a>
+        <!-- Report issue button -->
+        <button class="btn btn-orange" id="reportBtn" aria-label="Report an issue">
+          Report Issue
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MAIN CONTENT AREA - Chat + Sidebar
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="main">
+      <!-- LEFT: Chat panel -->
+      <section class="panel">
+        <!-- Message history -->
+        <div id="chat" class="chat" role="log" aria-live="polite" aria-label="Chat messages"></div>
+
+        <!-- Quick answer buttons (A/B/C/D + helpers) -->
+        <div class="choices" role="toolbar" aria-label="Quick response options">
+          <button class="chip" data-choice="A" disabled aria-label="Answer A" aria-describedby="buttonHelp">A</button>
+          <button class="chip" data-choice="B" disabled aria-label="Answer B" aria-describedby="buttonHelp">B</button>
+          <button class="chip" data-choice="C" disabled aria-label="Answer C" aria-describedby="buttonHelp">C</button>
+          <button class="chip" data-choice="D" disabled aria-label="I'm not sure" aria-describedby="buttonHelp">D (I'm not sure)</button>
+          <button class="chip" id="whyBtn" disabled aria-label="Ask why this step makes sense" aria-describedby="buttonHelp">Show me why</button>
+          <button class="chip" id="hintBtn" disabled aria-label="Get a hint" aria-describedby="buttonHelp">Hint</button>
+          <button class="chip" id="calcBtn" aria-label="Open calculator"><span aria-hidden="true">🔢</span> Calculator</button>
+        </div>
+        <!-- Hidden explanation for disabled buttons -->
+        <span id="buttonHelp" class="sr-only">Select a unit first to enable this button</span>
+
+        <!-- Message input area -->
+        <div class="compose">
+          <input
+            id="msg"
+            class="text"
+            type="text"
+            placeholder="Select topic, then type or paste your problem…"
+            aria-label="Type your message or problem"
+            autocomplete="off"
+          />
+          <button id="sendBtn" class="btn btn-send" aria-label="Send message">
+            Send
+          </button>
+        </div>
+      </section>
+
+      <!-- RIGHT: Settings sidebar -->
+      <aside class="side">
+        <!-- Student name input (REQUIRED) -->
+        <label for="studentName" class="label">Your First Name (required)</label>
+        <input id="studentName" type="text" placeholder="Enter your first name..." aria-label="Enter your first name" autocomplete="given-name" required />
+
+        <!-- Topic selection (required) -->
+        <label for="module" class="label mt-10">Unit (choose first)</label>
+        <select id="module" aria-required="true">
+          <option value="">— Choose a unit —</option>
+          <option value="unit1">Unit 1: Linear Equations & Inequalities</option>
+          <option value="unit2">Unit 2: Quadratics & Polynomials</option>
+          <option value="unit3">Unit 3: Exponentials & Logarithms</option>
+          <option value="other">General Help (concepts, review, study tips)</option>
+        </select>
+
+        <!-- Mode and Language selectors (side by side) -->
+        <div class="row mt-10">
+          <div>
+            <label for="mode" class="label">Support Level</label>
+            <select id="mode">
+              <option value="quick_hints">Need a Hint?</option>
+              <option value="step_by_step" selected>Walk Me Through It</option>
+              <option value="detailed_explanations">Teach Me More</option>
+            </select>
+          </div>
+          <div>
+            <label for="lang" class="label">Language</label>
+            <select id="lang">
+              <option value="English" selected>English (Recommended)</option>
+              <option value="Spanish">Spanish (Auto-translated)</option>
+              <option value="Other">Other…</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Custom language input (hidden by default) -->
+        <div id="langOtherWrap" style="display:none" class="mt-10">
+          <label for="langOther" class="label">Preferred Language</label>
+          <input id="langOther" type="text" placeholder="e.g., French, Mandarin…" />
+        </div>
+
+        <!-- Image upload (optional) -->
+        <div class="mt-10">
+          <label for="file" class="label">Add Problem Photo (optional)</label>
+          <input id="file" type="file" accept="image/*" aria-label="Upload image of problem" />
+          <!-- Image preview area (shown after upload) -->
+          <div id="preview" class="preview">
+            <img id="previewImg" alt="Uploaded problem image" />
+          </div>
+        </div>
+
+        <!-- Reset session button -->
+        <button id="resetBtn" class="btn btn-dark w-full mt-12" aria-label="Reset session">
+          Reset Session
+        </button>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       MODAL - Report Issue Form
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="modal" id="modal" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+    <div class="card">
+      <h3 id="modalTitle" class="mb-8">Report an Issue</h3>
+      <p class="mb-10" style="color:var(--text-medium)">
+        Please describe what happened. Be specific so we can fix it.
+      </p>
+
+      <label for="repCategory" class="label">Category</label>
+      <select id="repCategory">
+        <option value="math_error">Math appears incorrect</option>
+        <option value="unclear_explanation">Explanation was unclear</option>
+        <option value="ui_bug">Website or button issue</option>
+        <option value="accessibility">Accessibility concern</option>
+        <option value="other">Other</option>
+      </select>
+
+      <label for="reportText" class="label mt-10">What happened?</label>
+      <textarea
+        id="reportText"
+        placeholder="Example: The tutor said 2+2=5, or I couldn't click the Submit button."
+        aria-label="Describe the issue"
+      ></textarea>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-dark" id="cancelReport">Cancel</button>
+        <button class="btn btn-orange" id="submitReport">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       CALCULATOR MODAL
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="modal" id="calcModal" role="dialog" aria-labelledby="calcTitle" aria-modal="true">
+    <div class="card" style="max-width: 400px;">
+      <h3 id="calcTitle" class="mb-8">Calculator</h3>
+      <iframe
+        src="https://www.desmos.com/scientific"
+        width="100%"
+        height="500"
+        style="border: none; border-radius: 8px;"
+        title="Desmos Scientific Calculator">
+      </iframe>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-dark" id="closeCalc">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       TOAST - Temporary notification messages
+       ═══════════════════════════════════════════════════════════════ -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   STUDENT INTERFACE JAVASCRIPT
+
+   This code handles:
+   - Sending messages to AI tutor
+   - Displaying chat messages
+   - Quick answer buttons (A/B/C/D)
+   - Image uploads
+   - Session management
+   - Problem reporting
+
+   For developers: Code is organized into sections with clear comments
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+// ───────────────────────────────────────────────────────────────────────────
+// SETUP - Get references to page elements
+// ───────────────────────────────────────────────────────────────────────────
+
+const API = location.origin;  // Backend URL (same as website)
+const $ = (id) => document.getElementById(id);  // Shorthand for getting elements
+
+// State variables (data that changes as student uses the app)
+let sessionId = null;  // Current tutoring session ID (cleared on reset)
+let userToken = localStorage.getItem("userToken") || null;  // Anonymous user ID (persists)
+let userName = localStorage.getItem("userName") || "";  // Student's first name (persists)
+let imageB64 = null;  // Base64-encoded image data (cleared after sending)
+
+// Get references to all interactive elements
+const chat = $("chat");
+const msg = $("msg");
+const sendBtn = $("sendBtn");
+const file = $("file");
+const moduleSel = $("module");
+const modeSel = $("mode");
+const langSel = $("lang");
+const langOtherWrap = $("langOtherWrap");
+const langOther = $("langOther");
+const whyBtn = $("whyBtn");
+const hintBtn = $("hintBtn");
+const resetBtn = $("resetBtn");
+const statusDot = $("statusDot");
+const statusText = $("statusText");
+const reportBtn = $("reportBtn");
+const modal = $("modal");
+const cancelReport = $("cancelReport");
+const submitReport = $("submitReport");
+const reportText = $("reportText");
+const repCategory = $("repCategory");
+const previewWrap = $("preview");
+const previewImg = $("previewImg");
+const studentNameInput = $("studentName");
+const calcBtn = $("calcBtn");
+const calcModal = $("calcModal");
+const closeCalc = $("closeCalc");
+
+// ───────────────────────────────────────────────────────────────────────────
+// HELPER FUNCTIONS
+// ───────────────────────────────────────────────────────────────────────────
+
+/**
+ * Add a message to the chat display
+ * @param {string} text - Message content
+ * @param {string} who - "assistant" or "user"
+ * @param {string} imgUrl - Optional image URL to display
+ */
+function addMsg(text, who = "assistant", imgUrl = null) {
+  // Create message container
+  const row = document.createElement("div");
+  row.className = `msg ${who}`;
+
+  // Create avatar
+  const avatar = document.createElement("div");
+  avatar.className = "who";
+  avatar.setAttribute("aria-hidden", "true");
+  avatar.textContent = who === "assistant" ? "👤" : "🎓";
+
+  // Add screen reader label for who is speaking
+  const srLabel = document.createElement("span");
+  srLabel.className = "sr-only";
+  srLabel.textContent = who === "assistant" ? "Assistant:" : "You:";
+
+  // Create message bubble
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.textContent = text;
+
+  // Add image if provided
+  if (imgUrl) {
+    const img = document.createElement("img");
+    img.src = imgUrl;
+    img.style.maxWidth = "320px";
+    bubble.appendChild(img);
+  }
+
+  // Assemble and add to chat
+  row.appendChild(srLabel);
+  row.appendChild(avatar);
+  row.appendChild(bubble);
+  chat.appendChild(row);
+
+  // Scroll to show new message (smooth scroll with a small delay)
+  setTimeout(() => {
+    chat.scrollTo({
+      top: chat.scrollHeight,
+      behavior: 'smooth'
+    });
+  }, 50);
+}
+
+/**
+ * Show a temporary notification message
+ * @param {string} message - Text to display
+ * @param {number} duration - How long to show (milliseconds)
+ */
+function toast(message, duration = 2200) {
+  const el = $("toast");
+  el.textContent = message;
+  el.classList.add("show");
+  setTimeout(() => el.classList.remove("show"), duration);
+}
+
+/**
+ * Fetch JSON from API endpoint
+ */
+async function getJSON(url) {
+  const response = await fetch(url);
+  return response.ok ? response.json() : null;
+}
+
+/**
+ * Post JSON to API endpoint
+ */
+async function postJSON(url, body) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if (!response.ok) throw new Error("HTTP " + response.status);
+  return response.json();
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// SYSTEM STATUS - Check if backend is online
+// ───────────────────────────────────────────────────────────────────────────
+
+async function checkStatus() {
+  const health = await getJSON(`${API}/health`);
+  if (health && health.status === "ok") {
+    statusDot.style.background = "#10b981";  // Green
+    statusText.textContent = "Online & Ready";
+  } else {
+    statusDot.style.background = "#ef4444";  // Red
+    statusText.textContent = "Offline";
+  }
+}
+
+// Check status now and every 10 seconds
+checkStatus();
+setInterval(checkStatus, 10000);
+
+// ───────────────────────────────────────────────────────────────────────────
+// WELCOME MESSAGE - Shown when page loads or session resets
+// ───────────────────────────────────────────────────────────────────────────
+
+/**
+ * Get a randomized greeting based on time of day or day of week
+ * Does NOT include student's name (name added separately in showWelcome)
+ */
+function getGreeting() {
+  const greetings = [
+    // Time-based greetings
+    () => {
+      const hour = new Date().getHours();
+      if (hour < 12) return `Good morning`;
+      if (hour < 17) return `Good afternoon`;
+      return `Good evening`;
+    },
+    // Day-based greetings
+    () => {
+      const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const day = days[new Date().getDay()];
+      return `Happy ${day}`;
+    }
+  ];
+
+  // Randomly pick time-based or day-based
+  const greetingFunc = greetings[Math.floor(Math.random() * greetings.length)];
+  return greetingFunc();
+}
+
+function showWelcome() {
+  chat.innerHTML = "";  // Clear chat
+  if (userName) {
+    const greeting = getGreeting();
+    addMsg(`${greeting}, ${userName}! Choose a unit and share your problem to get started.`);
+  } else {
+    const greeting = getGreeting();
+    addMsg(`${greeting}! I'm your precalculus learning assistant. To begin, please enter your first name above.`);
+  }
+  updateButtonStates();
+}
+
+// Load saved name if exists
+if (userName) {
+  studentNameInput.value = userName;
+}
+
+// Update name when student types
+studentNameInput.addEventListener("input", () => {
+  userName = studentNameInput.value.trim();
+  if (userName) {
+    localStorage.setItem("userName", userName);
+    showWelcome();  // Refresh greeting with name
+  }
+});
+
+showWelcome();  // Show welcome on page load
+
+// ───────────────────────────────────────────────────────────────────────────
+// BUTTON STATE MANAGEMENT - Enable/disable based on topic selection
+// ───────────────────────────────────────────────────────────────────────────
+
+function updateButtonStates() {
+  // Quick answer buttons only work after topic is selected
+  const topicSelected = !!moduleSel.value;
+
+  // Enable/disable all choice buttons
+  document.querySelectorAll("[data-choice]").forEach(el => {
+    el.disabled = !topicSelected;
+  });
+  whyBtn.disabled = !topicSelected;
+  hintBtn.disabled = !topicSelected;
+}
+
+// Update button states when topic changes
+moduleSel.addEventListener("change", updateButtonStates);
+
+// ───────────────────────────────────────────────────────────────────────────
+// LANGUAGE SELECTION - Show custom input if "Other" selected
+// ───────────────────────────────────────────────────────────────────────────
+
+langSel.addEventListener("change", () => {
+  langOtherWrap.style.display = langSel.value === "Other" ? "block" : "none";
+});
+
+// ───────────────────────────────────────────────────────────────────────────
+// IMAGE HANDLING - Upload or paste images
+// ───────────────────────────────────────────────────────────────────────────
+
+// File upload via button
+file.addEventListener("change", () => {
+  const selectedFile = file.files[0];
+  if (!selectedFile) return;
+
+  // Check file size (limit: 5MB)
+  const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+  if (selectedFile.size > maxSize) {
+    toast("Image too large! Please use an image under 5MB.", 3000);
+    file.value = ""; // Clear selection
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const dataURL = e.target.result;
+    imageB64 = dataURL.split(",")[1];  // Get base64 part only
+
+    // Show preview
+    previewImg.src = dataURL;
+    previewWrap.style.display = "block";
+
+    // Add to chat
+    addMsg("Photo attached.", "user", dataURL);
+  };
+  reader.readAsDataURL(selectedFile);
+});
+
+// Paste image directly into text box
+msg.addEventListener("paste", (e) => {
+  for (const item of e.clipboardData?.items ?? []) {
+    if (item.type.includes('image')) {
+      e.preventDefault();
+
+      const file = item.getAsFile();
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const dataURL = ev.target.result;
+        imageB64 = dataURL.split(',')[1];
+
+        // Show preview
+        previewImg.src = dataURL;
+        previewWrap.style.display = "block";
+
+        // Add to chat
+        addMsg('Photo attached.', 'user', dataURL);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+});
+
+// ───────────────────────────────────────────────────────────────────────────
+// SEND MESSAGE - Main function to send student input to AI
+// ───────────────────────────────────────────────────────────────────────────
+
+async function send(message) {
+  // Check if student has entered their name first
+  if (!userName) {
+    toast("To begin, please enter your first name.");
+    studentNameInput.focus();
+    return;
+  }
+
+  const text = (message ?? msg.value).trim();
+
+  // Validate: need either text or image
+  if (!text && !imageB64) {
+    toast("Type a problem, or add a photo.");
+    return;
+  }
+
+  // Disable send button and show loading state
+  sendBtn.disabled = true;
+  sendBtn.textContent = "Sending...";
+
+  // Get selected options
+  const moduleVal = moduleSel.value || 'other';
+  const modeVal = modeSel.value || 'standard';
+  let langVal = langSel.value || 'English';
+  if (langVal === 'Other') {
+    langVal = langOther.value.trim() || 'English';
+  }
+
+  // Show user's message in chat
+  if (text) {
+    addMsg(text, "user");
+  }
+
+  // Prepare message for API
+  let msgToSend = text || "(photo only)";
+
+  // First message: include language preference
+  if (!sessionId) {
+    msgToSend = `Please respond in ${langVal}. ` + msgToSend;
+  }
+
+  // Build request payload
+  const payload = {
+    message: msgToSend,
+    session_id: sessionId || undefined,
+    user_token: userToken || undefined,
+    user_name: userName || undefined,
+    module: moduleVal,
+    image_data: imageB64 || undefined,
+    mode: modeVal
+  };
+
+  try {
+    // Send to backend
+    const data = await postJSON(`${API}/chat`, payload);
+
+    // Save session info
+    sessionId = data.session_id || sessionId;
+    if (data.user_token) {
+      userToken = data.user_token;
+      localStorage.setItem("userToken", userToken);
+    }
+
+    // Show AI response
+    addMsg(data.response, "assistant");
+
+  } catch (error) {
+    addMsg("Can't reach the server right now. Try again in a moment.", "assistant");
+    console.error("Send error:", error);
+  } finally {
+    // Re-enable send button
+    sendBtn.disabled = false;
+    sendBtn.textContent = "Send";
+
+    // Clear input for next message
+    imageB64 = null;
+    msg.value = "";
+    msg.focus();
+  }
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// EVENT LISTENERS - Wire up all buttons and inputs
+// ───────────────────────────────────────────────────────────────────────────
+
+// Send button
+sendBtn.onclick = () => send();
+
+// Enter key in text box (Shift+Enter for new line)
+msg.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    send();
+  }
+});
+
+// Quick answer buttons (A/B/C/D)
+document.querySelectorAll("[data-choice]").forEach(button => {
+  button.onclick = () => send(button.dataset.choice);
+});
+
+// Helper buttons
+whyBtn.onclick = () => send("Show me why");
+hintBtn.onclick = () => send("hint");
+
+// Reset session
+resetBtn.onclick = () => {
+  // Ask for confirmation before resetting
+  if (sessionId && !confirm("Reset your session? This will clear your current problem.")) {
+    return;  // User cancelled
+  }
+
+  addMsg("Nice work today! Come back anytime. The Math Center is here to help too.");
+
+  setTimeout(() => {
+    sessionId = null;  // Clear session
+    showWelcome();  // Show welcome message
+
+    // Clear image preview
+    previewWrap.style.display = "none";
+    previewImg.src = "";
+    file.value = "";
+  }, 400);
+};
+
+// ───────────────────────────────────────────────────────────────────────────
+// PROBLEM REPORTING - Let students report issues
+// ───────────────────────────────────────────────────────────────────────────
+
+// Open report modal
+reportBtn.onclick = () => {
+  modal.classList.add("active");
+  trapFocus(modal, reportText);
+};
+
+// Close modal without submitting
+cancelReport.onclick = () => {
+  modal.classList.remove("active");
+  reportText.value = "";
+  releaseFocus();
+};
+
+// Submit report
+submitReport.onclick = async () => {
+  const note = reportText.value.trim();
+
+  if (!note) {
+    toast("Please describe the issue.");
+    return;
+  }
+
+  try {
+    await postJSON(`${API}/report_problem`, {
+      user_token: userToken,
+      session_id: sessionId,
+      category: repCategory.value,
+      report: note,
+      timestamp: new Date().toISOString()
+    });
+
+    toast("Thanks! Your report was sent to Dr. Crenshaw.", 3500);
+    modal.classList.remove("active");
+    reportText.value = "";
+    releaseFocus();
+
+  } catch (error) {
+    toast("Couldn't send report. Try again soon.");
+    console.error("Report error:", error);
+  }
+};
+
+// Close modal when clicking outside
+modal.addEventListener("click", (e) => {
+  if (e.target === modal) {
+    modal.classList.remove("active");
+    reportText.value = "";
+    releaseFocus();
+  }
+});
+
+// ───────────────────────────────────────────────────────────────────────────
+// CALCULATOR - Embedded Desmos scientific calculator WITH TRACKING
+// ───────────────────────────────────────────────────────────────────────────
+
+// Open calculator and track usage
+calcBtn.onclick = () => {
+  // Track calculator usage if student has started a session
+  if (sessionId) {
+    fetch(`${API}/api/session/calculator-used`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: sessionId })
+    }).catch(err => {
+      console.error('Calculator tracking failed:', err);
+    });
+  }
+
+  // Open calculator modal
+  calcModal.classList.add("active");
+  trapFocus(calcModal, closeCalc);
+};
+
+// Close calculator
+closeCalc.onclick = () => {
+  calcModal.classList.remove("active");
+  releaseFocus();
+};
+
+// Close calculator when clicking outside
+calcModal.addEventListener("click", (e) => {
+  if (e.target === calcModal) {
+    calcModal.classList.remove("active");
+    releaseFocus();
+  }
+});
+
+// ───────────────────────────────────────────────────────────────────────────
+// KEYBOARD SHORTCUTS - Escape to close modals
+// ───────────────────────────────────────────────────────────────────────────
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    // Close report modal if open
+    if (modal.classList.contains("active")) {
+      modal.classList.remove("active");
+      reportText.value = "";
+      releaseFocus();
+    }
+    // Close calculator modal if open
+    if (calcModal.classList.contains("active")) {
+      calcModal.classList.remove("active");
+      releaseFocus();
+    }
+  }
+});
+
+// ───────────────────────────────────────────────────────────────────────────
+// FOCUS TRAP - Keep keyboard focus within modals
+// ───────────────────────────────────────────────────────────────────────────
+
+let lastFocusedElement = null;
+
+/**
+ * Trap keyboard focus within a modal dialog
+ * @param {HTMLElement} modalElement - The modal container
+ * @param {HTMLElement} initialFocus - Element to focus first
+ */
+function trapFocus(modalElement, initialFocus) {
+  // Save the element that had focus before modal opened
+  lastFocusedElement = document.activeElement;
+
+  // Focus the initial element
+  setTimeout(() => initialFocus.focus(), 50);
+
+  // Get all focusable elements in the modal
+  const focusableElements = modalElement.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  const firstFocusable = focusableElements[0];
+  const lastFocusable = focusableElements[focusableElements.length - 1];
+
+  // Handle Tab key to loop focus
+  modalElement.addEventListener("keydown", function trapHandler(e) {
+    if (e.key === "Tab") {
+      if (e.shiftKey) {
+        // Shift + Tab: if on first element, go to last
+        if (document.activeElement === firstFocusable) {
+          e.preventDefault();
+          lastFocusable.focus();
+        }
+      } else {
+        // Tab: if on last element, go to first
+        if (document.activeElement === lastFocusable) {
+          e.preventDefault();
+          firstFocusable.focus();
+        }
+      }
+    }
+  });
+}
+
+/**
+ * Release focus trap and return focus to previous element
+ */
+function releaseFocus() {
+  if (lastFocusedElement) {
+    lastFocusedElement.focus();
+    lastFocusedElement = null;
+  }
+}
+
+</script>
+</body>
+</html>
