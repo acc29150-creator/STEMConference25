@@ -35,7 +35,7 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel
 
 # Our configuration and prompts
-from config import COURSE, AI_SETTINGS
+from config import COURSE, AI_SETTINGS, EMAIL_SETTINGS
 from prompts import (
     build_system_prompt,
     COMPREHENSION_CHECK_PROMPT,
@@ -72,6 +72,9 @@ from firebase_service import FirebaseTrackingService
 # Backup Service
 from backup_service import BackupService, AutoBackupScheduler
 
+# Email Service
+from email_service import EmailService, should_send_weekly_digest
+
 # Create ONE FastAPI app instance
 app = FastAPI(title=f"{COURSE['code']} Learning Assistant")
 
@@ -88,15 +91,32 @@ client: Optional[AsyncOpenAI] = None
 firebase_service: Optional[FirebaseTrackingService] = None
 backup_service: Optional[BackupService] = None
 auto_backup: Optional[AutoBackupScheduler] = None
+email_service: Optional[EmailService] = None
 cleanup_thread: Optional[threading.Thread] = None
 stop_cleanup = threading.Event()
 
 def daily_cleanup_worker():
-    """Background worker to clean up old chat history daily."""
+    """Background worker to clean up old chat history daily and send weekly digest."""
+    last_digest_sent = None
+
     while not stop_cleanup.is_set():
         try:
+            # Clean up old chat history
             if firebase_service and firebase_service.use_firebase:
                 firebase_service.cleanup_old_chat_history(days=7)
+
+            # Check if we should send weekly digest (every Friday)
+            if email_service and should_send_weekly_digest():
+                # Only send once per day (check if we already sent today)
+                today = datetime.now(pytz.utc).date()
+                if last_digest_sent != today:
+                    print("[EMAIL] Friday detected - sending weekly digest...")
+                    try:
+                        email_service.send_weekly_digest()
+                        last_digest_sent = today
+                    except Exception as e:
+                        print(f"[EMAIL ERROR] Failed to send weekly digest: {e}")
+
         except Exception as e:
             print(f"[ERROR] Daily cleanup failed: {e}")
 
@@ -106,7 +126,7 @@ def daily_cleanup_worker():
 @app.on_event("startup")
 def init_openai():
     """Initialize the OpenAI client and Firebase once the app process is ready."""
-    global client, firebase_service, backup_service, auto_backup, cleanup_thread
+    global client, firebase_service, backup_service, auto_backup, email_service, cleanup_thread
     if AsyncOpenAI is None:
         raise RuntimeError("OpenAI SDK not installed. Run: pip install openai")
     key = os.getenv("OPENAI_API_KEY", "").strip()
@@ -150,6 +170,21 @@ def init_openai():
     # Start automatic backups every 12 hours
     auto_backup = AutoBackupScheduler(backup_service, interval_hours=12)
     auto_backup.start(lambda: (TRACKING["users"], TRACKING["sessions"], TRACKING["reports"]))
+
+    # Initialize Email Service
+    if EMAIL_SETTINGS.get("smtp_user") and EMAIL_SETTINGS.get("smtp_password"):
+        email_service = EmailService(
+            smtp_host=EMAIL_SETTINGS["smtp_host"],
+            smtp_port=EMAIL_SETTINGS["smtp_port"],
+            smtp_user=EMAIL_SETTINGS["smtp_user"],
+            smtp_password=EMAIL_SETTINGS["smtp_password"],
+            from_email=EMAIL_SETTINGS["from_email"],
+            to_email=EMAIL_SETTINGS["to_email"],
+            reports_file=EMAIL_SETTINGS["reports_file"]
+        )
+        print("[EMAIL] Service initialized successfully")
+    else:
+        print("[EMAIL] Service disabled - configure smtp_user and smtp_password in config.py")
 
 @app.on_event("shutdown")
 def shutdown_cleanup():
@@ -463,6 +498,8 @@ class ReportRequest(BaseModel):
     session_id: Optional[str] = None
     category: Optional[str] = None
     report: Optional[str] = None
+    user_name: Optional[str] = None
+    module: Optional[str] = None
 
 # ═══════════════════════════════════════════════════════════════════════════
 #                    SESSION MANAGEMENT
@@ -1054,21 +1091,31 @@ def mark_collaborator_sessions(data: dict):
 
 @app.post("/report_problem")
 def report_problem(req: ReportRequest):
-    """Handle student issue reports."""
+    """Handle student issue reports with email notifications."""
     report_data = {
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.now(pytz.utc).isoformat(),
         "user_token": req.user_token,
         "session_id": req.session_id,
         "category": req.category,
-        "report": req.report
+        "report": req.report,
+        "user_name": req.user_name or "Unknown",
+        "module": req.module or "Unknown"
     }
 
+    # Save to database
     if firebase_service and firebase_service.use_firebase:
         firebase_service.save_report(report_data)
         TRACKING["reports"].append(report_data)
     else:
         TRACKING["reports"].append(report_data)
         save_data()
+
+    # Send email notification (immediate for critical, queue for weekly digest)
+    if email_service:
+        try:
+            email_service.handle_report(report_data)
+        except Exception as e:
+            print(f"[EMAIL ERROR] Failed to process report: {e}")
 
     return {"status": "received", "message": "Thank you for helping us improve!"}
 

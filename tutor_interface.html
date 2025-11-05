@@ -213,11 +213,21 @@
       grid-template-columns: 1fr 320px;
       gap: 12px;
       padding: 10px;
+      transition: grid-template-columns 0.3s ease;
+    }
+
+    /* Collapsed sidebar state - chat takes more space */
+    .main.sidebar-collapsed {
+      grid-template-columns: 1fr 60px;
     }
 
     /* Responsive: stack on small screens */
     @media (max-width: 900px) {
       .main {
+        grid-template-columns: 1fr;
+      }
+
+      .main.sidebar-collapsed {
         grid-template-columns: 1fr;
       }
 
@@ -442,13 +452,14 @@
        MESSAGE INPUT AREA
        ═══════════════════════════════════════════════════════════════ */
     .compose {
-      display: grid;
-      grid-template-columns: 1fr auto;
+      display: flex;
       gap: 8px;
       margin-top: 8px;
+      align-items: flex-end;
     }
 
     .text {
+      flex: 1;
       padding: 10px 12px;
       border: 2px solid var(--border);
       border-radius: 10px;
@@ -463,6 +474,26 @@
       box-shadow: 0 0 0 3px rgba(37,99,235,.1);
     }
 
+    /* Photo button in compose area */
+    .btn-photo {
+      background: var(--blue-light);
+      color: var(--blue-dark);
+      padding: 10px 14px;
+      font-size: 20px;
+      border: 2px solid var(--blue-medium);
+      cursor: pointer;
+    }
+
+    .btn-photo:hover {
+      background: var(--blue-medium);
+      color: white;
+    }
+
+    /* Hidden file input */
+    #file {
+      display: none;
+    }
+
     /* ═══════════════════════════════════════════════════════════════
        SIDEBAR - Settings & Controls
        ═══════════════════════════════════════════════════════════════ */
@@ -471,6 +502,51 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    /* Sidebar collapse button */
+    .sidebar-toggle {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--blue-medium);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.2s;
+      z-index: 10;
+    }
+
+    .sidebar-toggle:hover {
+      background: var(--blue-dark);
+      transform: scale(1.05);
+    }
+
+    /* Sidebar content wrapper */
+    .sidebar-content {
+      opacity: 1;
+      transition: opacity 0.2s ease;
+    }
+
+    /* When sidebar is collapsed */
+    .sidebar-collapsed .sidebar-content {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .sidebar-collapsed .side {
+      padding: 12px 8px;
+    }
+
+    .sidebar-collapsed .sidebar-toggle {
+      right: 50%;
+      transform: translateX(50%);
     }
 
     .label {
@@ -506,16 +582,21 @@
       gap: 10px;
     }
 
-    /* Image preview */
+    /* Image preview (in compose area) */
     .preview {
       display: none;
       margin-top: 8px;
+      padding: 8px;
+      background: var(--bg-gray);
+      border-radius: 10px;
+      border: 2px dashed var(--border);
     }
 
     .preview img {
       max-width: 100%;
-      border-radius: 10px;
-      border: 3px solid var(--border);
+      max-height: 200px;
+      border-radius: 8px;
+      display: block;
     }
 
     /* ═══════════════════════════════════════════════════════════════
@@ -692,7 +773,7 @@
         <!-- Hidden explanation for disabled buttons -->
         <span id="buttonHelp" class="sr-only">Select a unit first to enable this button</span>
 
-        <!-- Message input area -->
+        <!-- Message input area with photo button -->
         <div class="compose">
           <input
             id="msg"
@@ -702,68 +783,77 @@
             aria-label="Type your message or problem"
             autocomplete="off"
           />
+          <button id="photoBtn" class="btn btn-photo" aria-label="Attach photo" title="Add photo">
+            📷
+          </button>
           <button id="sendBtn" class="btn btn-send" aria-label="Send message">
             Send
           </button>
+        </div>
+
+        <!-- Hidden file input -->
+        <input id="file" type="file" accept="image/*" aria-label="Upload image of problem" />
+
+        <!-- Image preview area (shown after upload) -->
+        <div id="preview" class="preview">
+          <img id="previewImg" alt="Uploaded problem image" />
         </div>
       </section>
 
       <!-- RIGHT: Settings sidebar -->
       <aside class="side">
-        <!-- Student name input (REQUIRED) -->
-        <label for="studentName" class="label">Your First Name (required)</label>
-        <input id="studentName" type="text" placeholder="Enter your first name..." aria-label="Enter your first name" autocomplete="given-name" required />
-
-        <!-- Topic selection (required) -->
-        <label for="module" class="label mt-10">Unit (choose first)</label>
-        <select id="module" aria-required="true">
-          <option value="">— Choose a unit —</option>
-          <option value="unit1">Unit 1: Linear Equations & Inequalities</option>
-          <option value="unit2">Unit 2: Quadratics & Polynomials</option>
-          <option value="unit3">Unit 3: Exponentials & Logarithms</option>
-          <option value="other">General Help (concepts, review, study tips)</option>
-        </select>
-
-        <!-- Mode and Language selectors (side by side) -->
-        <div class="row mt-10">
-          <div>
-            <label for="mode" class="label">Support Level</label>
-            <select id="mode">
-              <option value="quick_hints">Need a Hint?</option>
-              <option value="step_by_step" selected>Walk Me Through It</option>
-              <option value="detailed_explanations">Teach Me More</option>
-            </select>
-          </div>
-          <div>
-            <label for="lang" class="label">Language</label>
-            <select id="lang">
-              <option value="English" selected>English (Recommended)</option>
-              <option value="Spanish">Spanish (Auto-translated)</option>
-              <option value="Other">Other…</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Custom language input (hidden by default) -->
-        <div id="langOtherWrap" style="display:none" class="mt-10">
-          <label for="langOther" class="label">Preferred Language</label>
-          <input id="langOther" type="text" placeholder="e.g., French, Mandarin…" />
-        </div>
-
-        <!-- Image upload (optional) -->
-        <div class="mt-10">
-          <label for="file" class="label">Add Problem Photo (optional)</label>
-          <input id="file" type="file" accept="image/*" aria-label="Upload image of problem" />
-          <!-- Image preview area (shown after upload) -->
-          <div id="preview" class="preview">
-            <img id="previewImg" alt="Uploaded problem image" />
-          </div>
-        </div>
-
-        <!-- Reset session button -->
-        <button id="resetBtn" class="btn btn-dark w-full mt-12" aria-label="Reset session">
-          Reset Session
+        <!-- Collapse/Expand button -->
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar" title="Collapse sidebar">
+          ◀
         </button>
+
+        <!-- Sidebar content (hidden when collapsed) -->
+        <div class="sidebar-content">
+          <!-- Student name input (REQUIRED) -->
+          <label for="studentName" class="label">Your First Name (required)</label>
+          <input id="studentName" type="text" placeholder="Enter your first name..." aria-label="Enter your first name" autocomplete="given-name" required />
+
+          <!-- Topic selection (required) -->
+          <label for="module" class="label mt-10">Unit (choose first)</label>
+          <select id="module" aria-required="true">
+            <option value="">— Choose a unit —</option>
+            <option value="unit1">Unit 1: Linear Equations & Inequalities</option>
+            <option value="unit2">Unit 2: Quadratics & Polynomials</option>
+            <option value="unit3">Unit 3: Exponentials & Logarithms</option>
+            <option value="other">General Help (concepts, review, study tips)</option>
+          </select>
+
+          <!-- Mode and Language selectors (side by side) -->
+          <div class="row mt-10">
+            <div>
+              <label for="mode" class="label">Support Level</label>
+              <select id="mode">
+                <option value="quick_hints">Need a Hint?</option>
+                <option value="step_by_step" selected>Walk Me Through It</option>
+                <option value="detailed_explanations">Teach Me More</option>
+              </select>
+            </div>
+            <div>
+              <label for="lang" class="label">Language</label>
+              <select id="lang">
+                <option value="English" selected>English (Recommended)</option>
+                <option value="Spanish">Spanish (Auto-translated)</option>
+                <option value="Other">Other…</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Custom language input (hidden by default) -->
+          <div id="langOtherWrap" style="display:none" class="mt-10">
+            <label for="langOther" class="label">Preferred Language</label>
+            <input id="langOther" type="text" placeholder="e.g., French, Mandarin…" />
+          </div>
+
+          <!-- Reset session button -->
+          <button id="resetBtn" class="btn btn-dark w-full mt-12" aria-label="Reset session">
+            Reset Session
+          </button>
+        </div>
       </aside>
     </div>
   </div>
@@ -880,6 +970,9 @@ const studentNameInput = $("studentName");
 const calcBtn = $("calcBtn");
 const calcModal = $("calcModal");
 const closeCalc = $("closeCalc");
+const sidebarToggle = $("sidebarToggle");
+const mainContainer = document.querySelector(".main");
+const photoBtn = $("photoBtn");
 
 // ───────────────────────────────────────────────────────────────────────────
 // HELPER FUNCTIONS
@@ -1062,7 +1155,43 @@ function updateButtonStates() {
 }
 
 // Update button states when topic changes
-moduleSel.addEventListener("change", updateButtonStates);
+moduleSel.addEventListener("change", () => {
+  updateButtonStates();
+
+  // Auto-collapse sidebar after unit is selected (if not already collapsed)
+  if (moduleSel.value && !mainContainer.classList.contains("sidebar-collapsed")) {
+    setTimeout(() => {
+      toggleSidebar();
+    }, 800); // Small delay so student sees selection
+  }
+});
+
+// ───────────────────────────────────────────────────────────────────────────
+// SIDEBAR COLLAPSE/EXPAND - Maximize workspace area
+// ───────────────────────────────────────────────────────────────────────────
+
+// Check saved sidebar state
+const sidebarCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
+if (sidebarCollapsed) {
+  mainContainer.classList.add("sidebar-collapsed");
+  sidebarToggle.textContent = "▶";
+  sidebarToggle.title = "Expand sidebar";
+}
+
+// Toggle sidebar function
+function toggleSidebar() {
+  const isCollapsed = mainContainer.classList.toggle("sidebar-collapsed");
+
+  // Update button icon and tooltip
+  sidebarToggle.textContent = isCollapsed ? "▶" : "◀";
+  sidebarToggle.title = isCollapsed ? "Expand sidebar" : "Collapse sidebar";
+
+  // Save state
+  localStorage.setItem("sidebarCollapsed", isCollapsed);
+}
+
+// Toggle button click handler
+sidebarToggle.addEventListener("click", toggleSidebar);
 
 // ───────────────────────────────────────────────────────────────────────────
 // LANGUAGE SELECTION - Show custom input if "Other" selected
@@ -1075,6 +1204,11 @@ langSel.addEventListener("change", () => {
 // ───────────────────────────────────────────────────────────────────────────
 // IMAGE HANDLING - Upload or paste images
 // ───────────────────────────────────────────────────────────────────────────
+
+// Photo button triggers file input
+photoBtn.addEventListener("click", () => {
+  file.click();
+});
 
 // File upload via button
 file.addEventListener("change", () => {
@@ -1289,6 +1423,8 @@ submitReport.onclick = async () => {
       session_id: sessionId,
       category: repCategory.value,
       report: note,
+      user_name: userName || "Unknown",
+      module: moduleSel.value || "Unknown",
       timestamp: new Date().toISOString()
     });
 

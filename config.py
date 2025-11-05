@@ -403,6 +403,35 @@ CULTURAL RESPONSIVENESS
 ✓ Build on what students already know
 """
 
+# ==================== EMAIL SETTINGS ====================
+# Configure email notifications for problem reports
+
+EMAIL_SETTINGS = {
+    # SMTP Server Configuration
+    # For Gmail: Use "smtp.gmail.com" with port 587
+    # For Outlook: Use "smtp-mail.outlook.com" with port 587
+    # For institutional email: Contact your IT department
+    "smtp_host": "smtp.gmail.com",
+    "smtp_port": 587,
+
+    # Authentication
+    # IMPORTANT: For Gmail, create an "App Password" instead of using your regular password
+    # Go to: Google Account → Security → 2-Step Verification → App passwords
+    "smtp_user": "",  # Your email address (e.g., "april.crenshaw@chattanoogastate.edu")
+    "smtp_password": "",  # Your app-specific password (NOT your regular password)
+
+    # Email Addresses
+    "from_email": "math1710-tutor@chattanoogastate.edu",
+    "to_email": "april.crenshaw@chattanoogastate.edu",
+
+    # Scheduling
+    "send_digest_on_friday": True,  # Send weekly digest every Friday
+    "digest_day": 4,  # 0=Monday, 1=Tuesday, ..., 4=Friday, 5=Saturday, 6=Sunday
+
+    # Reports Storage
+    "reports_file": "data/pending_reports.json",
+}
+
 # ==================== AI MODEL SETTINGS ====================
 # Note: This is application configuration, not course configuration
 # Consider moving to separate app_config.py or settings.py in production
