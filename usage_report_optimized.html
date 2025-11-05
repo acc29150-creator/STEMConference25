@@ -272,6 +272,182 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+
+    /* ========== Phase 1 & 2 Enhancements ========== */
+
+    .alert-section {
+      background: #fef2f2;
+      border: 2px solid #fca5a5;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 32px;
+    }
+
+    .alert-section h2 {
+      color: #991b1b;
+      border-bottom: 2px solid #fca5a5;
+    }
+
+    .alert-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .alert-card {
+      background: white;
+      border: 1px solid #fca5a5;
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .alert-card .student-name {
+      font-weight: 700;
+      font-size: 16px;
+      color: #991b1b;
+    }
+
+    .alert-card .alert-reason {
+      font-size: 14px;
+      color: #dc2626;
+    }
+
+    .alert-card .alert-date {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    .status-green { background: #10b981; }
+    .status-yellow { background: #fbbf24; }
+    .status-orange { background: #f97316; }
+    .status-red { background: #ef4444; }
+
+    .status-text {
+      font-size: 13px;
+      color: #6b7280;
+      margin-left: 4px;
+    }
+
+    .recommendations-section {
+      background: #eff6ff;
+      border: 2px solid #93c5fd;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 32px;
+    }
+
+    .recommendations-section h2 {
+      color: #1e40af;
+      border-bottom: 2px solid #93c5fd;
+    }
+
+    .recommendation-item {
+      background: white;
+      border-left: 4px solid #3b82f6;
+      padding: 12px 16px;
+      margin: 12px 0;
+      border-radius: 4px;
+    }
+
+    .recommendation-item strong {
+      color: #1e40af;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .insight-badge {
+      display: inline-block;
+      background: #10b981;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-left: 8px;
+    }
+
+    .insight-badge.warning {
+      background: #f97316;
+    }
+
+    .insight-badge.info {
+      background: #3b82f6;
+    }
+
+    .difficulty-rank {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .difficulty-bar {
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+      width: 100px;
+      margin: 0 8px;
+    }
+
+    .difficulty-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .difficulty-fill.high { background: #ef4444; }
+    .difficulty-fill.medium { background: #f97316; }
+    .difficulty-fill.low { background: #10b981; }
+
+    .metric-comparison {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .metric-item {
+      text-align: center;
+      padding: 12px;
+      background: #f9fafb;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .metric-item .metric-label {
+      font-size: 12px;
+      color: #6b7280;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .metric-item .metric-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1e40af;
+    }
+
+    .trend-indicator {
+      display: inline-block;
+      margin-left: 8px;
+      font-size: 18px;
+    }
+
+    .trend-up { color: #10b981; }
+    .trend-down { color: #ef4444; }
   </style>
 </head>
 <body>
@@ -441,6 +617,177 @@
       },
 
       // ═══════════════════════════════════════════════════════════════
+      // ANALYTICS CALCULATIONS (Phase 1 & 2)
+      // ═══════════════════════════════════════════════════════════════
+
+      getStudentsNeedingAttention() {
+        const allActiveSessions = [
+          ...this.state.processedSessions.past7Days,
+          ...this.state.processedSessions.past14Days,
+          ...this.state.processedSessions.past30Days,
+          ...this.state.processedSessions.past60Days
+        ];
+
+        // Remove duplicates
+        const uniqueSessions = Array.from(
+          new Map(allActiveSessions.map(s => [s.id, s])).values()
+        );
+
+        const flagged = uniqueSessions.filter(session => {
+          const wrong = session.wrong_responses || session.incorrect_count || 0;
+          const duration = session.duration_seconds || 0;
+          const durationMin = Math.round(duration / 60);
+
+          return wrong >= 5 || durationMin >= 30;
+        });
+
+        // Sort by severity (wrong responses desc, then duration desc)
+        return flagged.sort((a, b) => {
+          const aWrong = a.wrong_responses || a.incorrect_count || 0;
+          const bWrong = b.wrong_responses || b.incorrect_count || 0;
+          if (bWrong !== aWrong) return bWrong - aWrong;
+          return (b.duration_seconds || 0) - (a.duration_seconds || 0);
+        }).slice(0, 10); // Top 10 most urgent
+      },
+
+      getMostChallengingUnits() {
+        const allActiveSessions = [
+          ...this.state.processedSessions.past30Days // Last 30 days for relevance
+        ];
+
+        const byUnit = {};
+
+        allActiveSessions.forEach(session => {
+          const unit = session.module || 'Unknown';
+          if (!byUnit[unit]) {
+            byUnit[unit] = {
+              unit,
+              totalWrong: 0,
+              totalHints: 0,
+              totalDuration: 0,
+              sessionCount: 0
+            };
+          }
+
+          byUnit[unit].totalWrong += session.wrong_responses || session.incorrect_count || 0;
+          byUnit[unit].totalHints += session.hints_requested || session.hint_count || 0;
+          byUnit[unit].totalDuration += session.duration_seconds || 0;
+          byUnit[unit].sessionCount++;
+        });
+
+        // Calculate averages and sort by difficulty
+        return Object.values(byUnit)
+          .map(u => ({
+            unit: u.unit,
+            avgWrong: u.totalWrong / u.sessionCount,
+            avgHints: u.totalHints / u.sessionCount,
+            avgDuration: Math.round(u.totalDuration / u.sessionCount / 60),
+            sessionCount: u.sessionCount,
+            difficultyScore: (u.totalWrong / u.sessionCount) * 2 + (u.totalHints / u.sessionCount)
+          }))
+          .sort((a, b) => b.difficultyScore - a.difficultyScore);
+      },
+
+      getModeEffectiveness() {
+        const allActiveSessions = [
+          ...this.state.processedSessions.past30Days
+        ];
+
+        const byMode = {};
+
+        allActiveSessions.forEach(session => {
+          const mode = session.mode || 'Standard';
+          if (!byMode[mode]) {
+            byMode[mode] = {
+              mode,
+              totalWrong: 0,
+              totalHints: 0,
+              totalDuration: 0,
+              sessionCount: 0,
+              completed: 0
+            };
+          }
+
+          byMode[mode].totalWrong += session.wrong_responses || session.incorrect_count || 0;
+          byMode[mode].totalHints += session.hints_requested || session.hint_count || 0;
+          byMode[mode].totalDuration += session.duration_seconds || 0;
+          byMode[mode].sessionCount++;
+
+          if (session.completed || session.final_answer_correct) {
+            byMode[mode].completed++;
+          }
+        });
+
+        return Object.values(byMode).map(m => ({
+          mode: m.mode,
+          avgWrong: (m.totalWrong / m.sessionCount).toFixed(1),
+          avgHints: (m.totalHints / m.sessionCount).toFixed(1),
+          avgDuration: Math.round(m.totalDuration / m.sessionCount / 60),
+          sessionCount: m.sessionCount,
+          successRate: m.completed > 0 ? Math.round((m.completed / m.sessionCount) * 100) : 0
+        }));
+      },
+
+      getPeakUsageTimes() {
+        const allActiveSessions = [
+          ...this.state.processedSessions.past7Days
+        ];
+
+        const hourCounts = {};
+        for (let i = 0; i < 24; i++) {
+          hourCounts[i] = 0;
+        }
+
+        allActiveSessions.forEach(session => {
+          const hour = new Date(session.started).getHours();
+          hourCounts[hour]++;
+        });
+
+        // Find top 4 peak hours
+        return Object.entries(hourCounts)
+          .map(([hour, count]) => ({
+            hour: parseInt(hour),
+            count,
+            timeRange: this.formatTimeRange(parseInt(hour))
+          }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 4);
+      },
+
+      formatTimeRange(hour) {
+        const start = hour === 0 ? '12am' : hour < 12 ? `${hour}am` : hour === 12 ? '12pm' : `${hour-12}pm`;
+        const end = hour === 23 ? '12am' : hour < 11 ? `${hour+1}am` : hour === 11 ? '12pm' : `${hour-11}pm`;
+        return `${start}-${end}`;
+      },
+
+      getEngagementMetrics() {
+        const allActiveSessions = [
+          ...this.state.processedSessions.past30Days
+        ];
+
+        const userSessionCounts = {};
+        allActiveSessions.forEach(session => {
+          const token = session.user_token;
+          userSessionCounts[token] = (userSessionCounts[token] || 0) + 1;
+        });
+
+        const totalUsers = Object.keys(userSessionCounts).length;
+        const totalSessions = allActiveSessions.length;
+        const repeatUsers = Object.values(userSessionCounts).filter(count => count > 1).length;
+        const oneTimeUsers = totalUsers - repeatUsers;
+        const avgSessionsPerUser = totalUsers > 0 ? (totalSessions / totalUsers).toFixed(1) : 0;
+        const returnRate = totalUsers > 0 ? Math.round((repeatUsers / totalUsers) * 100) : 0;
+
+        return {
+          totalUsers,
+          repeatUsers,
+          oneTimeUsers,
+          returnRate,
+          avgSessionsPerUser
+        };
+      },
+
+      // ═══════════════════════════════════════════════════════════════
       // RENDERING
       // ═══════════════════════════════════════════════════════════════
 
@@ -454,8 +801,17 @@
           return;
         }
 
+        // Calculate Phase 1 & 2 analytics
+        const studentsNeedingAttention = this.getStudentsNeedingAttention();
+        const challengingUnits = this.getMostChallengingUnits();
+        const modeEffectiveness = this.getModeEffectiveness();
+        const peakTimes = this.getPeakUsageTimes();
+        const engagement = this.getEngagementMetrics();
+
         // OPTIMIZATION: Build HTML structure once
         content.innerHTML = `
+          ${this.renderStudentsNeedingAttention(studentsNeedingAttention)}
+          ${this.renderRecommendations(studentsNeedingAttention, challengingUnits, engagement, peakTimes)}
           <div class="section">
             <h2>📈 Overview</h2>
             <p style="color: #6b7280; margin-bottom: 16px;">Generated at: ${data.generated_at}</p>
@@ -479,6 +835,11 @@
               </div>
             </div>
           </div>
+
+          ${this.renderEngagementMetrics(engagement)}
+          ${this.renderMostChallengingUnits(challengingUnits)}
+          ${this.renderModeEffectiveness(modeEffectiveness)}
+          ${this.renderPeakUsageTimes(peakTimes)}
 
           <div class="section">
             <h2>👥 Active Users by Time Period</h2>
@@ -570,6 +931,304 @@
         `;
       },
 
+      renderStudentsNeedingAttention(students) {
+        if (students.length === 0) {
+          return `
+            <div class="section">
+              <h2>✅ All Students Performing Well</h2>
+              <p style="color: #6b7280;">No students currently flagged as needing attention. Great!</p>
+            </div>
+          `;
+        }
+
+        const cards = students.map(session => {
+          const user = this.state.fullData.users?.[session.user_token];
+          const userName = this.escapeHtml(user?.name || 'Anonymous');
+          const wrong = session.wrong_responses || session.incorrect_count || 0;
+          const duration = session.duration_seconds ? Math.round(session.duration_seconds / 60) : 0;
+          const daysAgo = Math.floor((Date.now() - new Date(session.started).getTime()) / (1000 * 60 * 60 * 24));
+
+          let reason = '';
+          if (wrong >= 7) reason = `${wrong} wrong responses (high struggle)`;
+          else if (wrong >= 5) reason = `${wrong} wrong responses`;
+          else if (duration >= 45) reason = `${duration} min session (may be stuck)`;
+          else if (duration >= 30) reason = `${duration} min session`;
+
+          const timeAgo = daysAgo === 0 ? 'Today' : daysAgo === 1 ? 'Yesterday' : `${daysAgo} days ago`;
+
+          return `
+            <div class="alert-card">
+              <div class="student-name">${userName}</div>
+              <div class="alert-reason">${session.module || 'Unknown Unit'}, ${reason}</div>
+              <div class="alert-date">${timeAgo}</div>
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div class="alert-section">
+            <h2>🚨 Students Needing Attention (${students.length})</h2>
+            <div class="alert-grid">
+              ${cards}
+            </div>
+          </div>
+        `;
+      },
+
+      renderRecommendations(students, challengingUnits, engagement, peakTimes) {
+        const recommendations = [];
+
+        // Student-specific recommendations
+        if (students.length > 0) {
+          const topStudents = students.slice(0, 3).map(s => {
+            const user = this.state.fullData.users?.[s.user_token];
+            return this.escapeHtml(user?.name || 'Anonymous');
+          });
+          recommendations.push({
+            category: 'REACH OUT TO',
+            text: `Consider 1-on-1 help for: ${topStudents.join(', ')}`
+          });
+        }
+
+        // Unit-specific recommendations
+        if (challengingUnits.length > 0 && challengingUnits[0].avgWrong > 3) {
+          const hardestUnit = challengingUnits[0];
+          recommendations.push({
+            category: 'TEACHING FOCUS',
+            text: `${hardestUnit.unit} is proving challenging (avg ${hardestUnit.avgWrong.toFixed(1)} wrong responses) - consider additional scaffolding or examples`
+          });
+        }
+
+        // Engagement recommendations
+        if (engagement.returnRate >= 75) {
+          recommendations.push({
+            category: 'SUCCESS STORY',
+            text: `${engagement.returnRate}% of students return after first session - the tutor is engaging!`
+          });
+        } else if (engagement.returnRate < 50) {
+          recommendations.push({
+            category: 'ENGAGEMENT CONCERN',
+            text: `Only ${engagement.returnRate}% of students return - consider survey to understand why`
+          });
+        }
+
+        // Peak time recommendations
+        if (peakTimes.length > 0 && peakTimes[0].count >= 5) {
+          const peak = peakTimes[0];
+          recommendations.push({
+            category: 'OFFICE HOURS',
+            text: `Peak usage is ${peak.timeRange} - consider scheduling virtual office hours then`
+          });
+        }
+
+        if (recommendations.length === 0) {
+          return '';
+        }
+
+        const items = recommendations.map(r => `
+          <div class="recommendation-item">
+            <strong>${r.category}:</strong>
+            ${r.text}
+          </div>
+        `).join('');
+
+        return `
+          <div class="recommendations-section">
+            <h2>💡 Auto-Generated Recommendations</h2>
+            ${items}
+          </div>
+        `;
+      },
+
+      renderEngagementMetrics(engagement) {
+        return `
+          <div class="section">
+            <h2>🔄 Student Engagement (Past 30 Days)</h2>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value">${engagement.totalUsers}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Return Rate</div>
+                <div class="stat-value">${engagement.returnRate}%
+                  ${engagement.returnRate >= 75 ? '<span class="insight-badge">Excellent</span>' :
+                    engagement.returnRate >= 50 ? '<span class="insight-badge info">Good</span>' :
+                    '<span class="insight-badge warning">Needs Work</span>'}
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Repeat Users</div>
+                <div class="stat-value">${engagement.repeatUsers}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">One-Time Users</div>
+                <div class="stat-value">${engagement.oneTimeUsers}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Avg Sessions/Student</div>
+                <div class="stat-value">${engagement.avgSessionsPerUser}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      },
+
+      renderMostChallengingUnits(units) {
+        if (units.length === 0) {
+          return '';
+        }
+
+        const rows = units.map((unit, index) => {
+          let difficultyClass = 'low';
+          let difficultyPercent = 30;
+          if (unit.avgWrong > 4) {
+            difficultyClass = 'high';
+            difficultyPercent = 90;
+          } else if (unit.avgWrong > 2.5) {
+            difficultyClass = 'medium';
+            difficultyPercent = 60;
+          }
+
+          const statusColor = unit.avgWrong >= 5 ? 'red' : unit.avgWrong >= 3 ? 'orange' : unit.avgWrong >= 2 ? 'yellow' : 'green';
+
+          return `
+            <tr>
+              <td><strong>${index + 1}</strong></td>
+              <td>
+                <span class="status-indicator status-${statusColor}"></span>
+                <strong>${this.escapeHtml(unit.unit)}</strong>
+              </td>
+              <td>${unit.avgWrong.toFixed(1)}</td>
+              <td>${unit.avgHints.toFixed(1)}</td>
+              <td>${unit.avgDuration} min</td>
+              <td>${unit.sessionCount}</td>
+              <td>
+                <div class="difficulty-bar">
+                  <div class="difficulty-fill ${difficultyClass}" style="width: ${difficultyPercent}%"></div>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        return `
+          <div class="section">
+            <h2>📉 Most Challenging Units (Past 30 Days)</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Unit</th>
+                  <th>Avg Wrong</th>
+                  <th>Avg Hints</th>
+                  <th>Avg Time</th>
+                  <th>Sessions</th>
+                  <th>Difficulty</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+            </table>
+          </div>
+        `;
+      },
+
+      renderModeEffectiveness(modes) {
+        if (modes.length === 0) {
+          return '';
+        }
+
+        const rows = modes.map(mode => {
+          const statusColor = mode.avgWrong >= 4 ? 'red' : mode.avgWrong >= 2.5 ? 'orange' : mode.avgWrong >= 1.5 ? 'yellow' : 'green';
+          const successBadge = mode.successRate >= 85 ? 'Excellent' : mode.successRate >= 70 ? 'Good' : mode.successRate >= 50 ? 'Fair' : 'Needs Review';
+          const badgeClass = mode.successRate >= 85 ? '' : mode.successRate >= 70 ? 'info' : 'warning';
+
+          return `
+            <tr>
+              <td>
+                <span class="status-indicator status-${statusColor}"></span>
+                <strong>${this.escapeHtml(mode.mode)}</strong>
+              </td>
+              <td>${mode.avgWrong}</td>
+              <td>${mode.avgHints}</td>
+              <td>${mode.avgDuration} min</td>
+              <td>${mode.sessionCount}</td>
+              <td>${mode.successRate}% <span class="insight-badge ${badgeClass}">${successBadge}</span></td>
+            </tr>
+          `;
+        }).join('');
+
+        return `
+          <div class="section">
+            <h2>🎯 Mode Effectiveness Comparison (Past 30 Days)</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Mode</th>
+                  <th>Avg Wrong</th>
+                  <th>Avg Hints</th>
+                  <th>Avg Time</th>
+                  <th>Sessions</th>
+                  <th>Success Rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+            </table>
+            <p style="color: #6b7280; margin-top: 12px; font-size: 13px;">
+              <strong>Note:</strong> Success rate based on completed sessions. Higher success may correlate with longer time investment.
+            </p>
+          </div>
+        `;
+      },
+
+      renderPeakUsageTimes(peaks) {
+        if (peaks.length === 0 || peaks[0].count === 0) {
+          return '';
+        }
+
+        const maxCount = peaks[0].count;
+        const rows = peaks.map(peak => {
+          const barWidth = (peak.count / maxCount) * 100;
+          return `
+            <tr>
+              <td><strong>${peak.timeRange}</strong></td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="flex: 1; height: 24px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                    <div style="height: 100%; background: #3b82f6; width: ${barWidth}%; border-radius: 4px;"></div>
+                  </div>
+                  <strong style="min-width: 40px; text-align: right;">${peak.count}</strong>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        return `
+          <div class="section">
+            <h2>⏰ Peak Usage Times (Past 7 Days)</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Time Range</th>
+                  <th>Sessions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+            </table>
+            <p style="color: #6b7280; margin-top: 12px; font-size: 13px;">
+              💡 <strong>Tip:</strong> Consider scheduling office hours during peak usage times for maximum impact.
+            </p>
+          </div>
+        `;
+      },
+
       renderSessionHistory(sessions) {
         return `
           <div class="section">
@@ -648,15 +1307,35 @@
         const calculatorUse = session.calculator_used || session.calculator_count || 0;
         const wrongResponses = session.wrong_responses || session.incorrect_count || 0;
 
+        // Color-coded status based on wrong responses
+        let statusColor = 'green';
+        let statusText = 'Good';
+        if (wrongResponses >= 7) {
+          statusColor = 'red';
+          statusText = 'High struggle';
+        } else if (wrongResponses >= 5) {
+          statusColor = 'orange';
+          statusText = 'Needs support';
+        } else if (wrongResponses >= 3) {
+          statusColor = 'yellow';
+          statusText = 'Watch';
+        }
+
         return `
           <tr data-search="${userName.toLowerCase()} ${(session.module || '').toLowerCase()} ${(session.mode || '').toLowerCase()}">
-            <td><strong>${userName}</strong>${roleInfo}</td>
+            <td>
+              <span class="status-indicator status-${statusColor}"></span>
+              <strong>${userName}</strong>${roleInfo}
+            </td>
             <td>${this.escapeHtml(session.module || 'Unknown')}</td>
             <td>${this.escapeHtml(session.mode || 'Standard')}</td>
             <td>${duration}${typeof duration === 'number' ? ' min' : ''}</td>
             <td>${hints}</td>
             <td>${calculatorUse}</td>
-            <td>${wrongResponses}</td>
+            <td>
+              ${wrongResponses}
+              ${wrongResponses >= 5 ? `<span class="status-text">(${statusText})</span>` : ''}
+            </td>
           </tr>
         `;
       },
