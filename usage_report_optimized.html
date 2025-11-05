@@ -836,6 +836,7 @@
             </div>
           </div>
 
+          ${this.renderRecentActivity(sessions)}
           ${this.renderEngagementMetrics(engagement)}
           ${this.renderMostChallengingUnits(challengingUnits)}
           ${this.renderModeEffectiveness(modeEffectiveness)}
@@ -1036,6 +1037,78 @@
           <div class="recommendations-section">
             <h2>💡 Auto-Generated Recommendations</h2>
             ${items}
+          </div>
+        `;
+      },
+
+      renderRecentActivity(sessions) {
+        // Get most recent 20 sessions across all categories
+        const allActiveSessions = [
+          ...sessions.past7Days,
+          ...sessions.past14Days,
+          ...sessions.past30Days,
+          ...sessions.past60Days
+        ];
+
+        // Remove duplicates and sort by most recent
+        const uniqueSessions = Array.from(
+          new Map(allActiveSessions.map(s => [s.id, s])).values()
+        ).sort((a, b) => new Date(b.started) - new Date(a.started));
+
+        const recentSessions = uniqueSessions.slice(0, 20);
+
+        if (recentSessions.length === 0) {
+          return `
+            <div class="section">
+              <h2>📋 Recent Activity</h2>
+              <p style="color: #6b7280;">No recent sessions</p>
+            </div>
+          `;
+        }
+
+        const rows = recentSessions.map(session => {
+          const user = this.state.fullData.users?.[session.user_token];
+          const userName = this.escapeHtml(user?.name || 'Anonymous');
+          const duration = session.duration_seconds
+            ? Math.round(session.duration_seconds / 60)
+            : 'In progress';
+          const startDate = new Date(session.started);
+          const dateStr = startDate.toLocaleDateString();
+          const timeStr = startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          return `
+            <tr>
+              <td><strong>${userName}</strong></td>
+              <td>${this.escapeHtml(session.module || 'Unknown')}</td>
+              <td>${this.escapeHtml(session.mode || 'Standard')}</td>
+              <td>${dateStr}</td>
+              <td>${timeStr}</td>
+              <td>${duration}${typeof duration === 'number' ? ' min' : ''}</td>
+            </tr>
+          `;
+        }).join('');
+
+        return `
+          <div class="section">
+            <h2>📋 Recent Activity (Last 20 Sessions)</h2>
+            <p style="color: #6b7280; margin-bottom: 12px; font-size: 14px;">
+              Simple list of who used the tutor and when - for reporting purposes
+            </p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Unit</th>
+                  <th>Mode</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Duration</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+            </table>
           </div>
         `;
       },
