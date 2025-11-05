@@ -286,7 +286,7 @@
       <button class="export-btn" onclick="app.exportToCSV()">📥 Export to CSV</button>
       <label class="auto-refresh-toggle">
         <input type="checkbox" id="autoRefreshToggle" onchange="app.toggleAutoRefresh()">
-        Auto-refresh (30s)
+        Auto-refresh (30 min)
       </label>
       <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search students, units, sessions..." oninput="app.filterSessions()">
       <span class="last-updated" id="lastUpdated"></span>
@@ -579,7 +579,7 @@
             ${this.renderAccordion(1, '📆 Past 14 Days', sessions.past14Days)}
             ${this.renderAccordion(2, '📊 Past 30 Days', sessions.past30Days)}
             ${this.renderAccordion(3, '📈 Past 60 Days', sessions.past60Days)}
-            ${this.renderAccordion(4, '🎓 Student Collaborators', sessions.collaborators, true)}
+            ${this.renderAccordion(4, '🎓 Colleagues and Student Collaborators', sessions.collaborators, true)}
             ${this.renderAccordion(5, '🗄️ Archived (90+ Days, Max 100)', sessions.archived90Plus)}
           </div>
         `;
@@ -740,11 +740,11 @@
         const checkbox = document.getElementById('autoRefreshToggle');
 
         if (checkbox.checked) {
-          // Start auto-refresh (30 seconds)
+          // Start auto-refresh (30 minutes)
           this.state.autoRefreshInterval = setInterval(() => {
             this.refresh();
-          }, 30000);
-          console.log('Auto-refresh enabled (30s)');
+          }, 1800000); // 30 minutes = 30 * 60 * 1000
+          console.log('Auto-refresh enabled (30 min)');
         } else {
           // Stop auto-refresh
           if (this.state.autoRefreshInterval) {
