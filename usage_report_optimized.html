@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usage Report - MATH 1710 Tutor (Optimized)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #1e40af 0%, #1e293b 100%);
+      color: #111827;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+
+    h1 {
+      color: #1e40af;
+      margin-bottom: 8px;
+      font-size: 32px;
+    }
+
+    .subtitle {
+      color: #6b7280;
+      margin-bottom: 24px;
+      font-size: 16px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .refresh-btn, .export-btn {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+
+    .refresh-btn:hover {
+      background: #059669;
+    }
+
+    .refresh-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .export-btn {
+      background: #3b82f6;
+    }
+
+    .export-btn:hover {
+      background: #2563eb;
+    }
+
+    .auto-refresh-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #374151;
+      font-size: 14px;
+    }
+
+    .auto-refresh-toggle input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 250px;
+      padding: 10px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    .section {
+      margin-bottom: 32px;
+    }
+
+    .section h2 {
+      color: #1e40af;
+      font-size: 20px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: #1e40af;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    th {
+      background: #f3f4f6;
+      padding: 12px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 13px;
+      color: #374151;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+
+    tr:hover {
+      background: #f9fafb;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px;
+      color: #6b7280;
+      font-style: italic;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 48px;
+      color: #6b7280;
+    }
+
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid #fecaca;
+    }
+
+    .accordion-item {
+      margin-bottom: 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .accordion-header {
+      background: #f9fafb;
+      padding: 16px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+    }
+
+    .accordion-header:hover {
+      background: #f3f4f6;
+    }
+
+    .accordion-header.active {
+      background: #e0e7ff;
+    }
+
+    .accordion-title {
+      font-weight: 700;
+      color: #374151;
+      font-size: 15px;
+    }
+
+    .accordion-count {
+      background: #1e40af;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .accordion-content.active {
+      max-height: 3000px;
+    }
+
+    .accordion-content table {
+      margin: 0;
+    }
+
+    .last-updated {
+      color: #6b7280;
+      font-size: 13px;
+      margin-left: auto;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 Usage Report</h1>
+    <p class="subtitle">MATH 1710 Precalculus Learning Assistant (Optimized)</p>
+
+    <div class="toolbar">
+      <button class="refresh-btn" id="refreshBtn" onclick="app.refresh()">
+        <span id="refreshText">🔄 Refresh Data</span>
+      </button>
+      <button class="export-btn" onclick="app.exportToCSV()">📥 Export to CSV</button>
+      <label class="auto-refresh-toggle">
+        <input type="checkbox" id="autoRefreshToggle" onchange="app.toggleAutoRefresh()">
+        Auto-refresh (30s)
+      </label>
+      <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search students, units, sessions..." oninput="app.filterSessions()">
+      <span class="last-updated" id="lastUpdated"></span>
+    </div>
+
+    <div id="content">
+      <div class="loading">Loading data...</div>
+    </div>
+  </div>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════════════
+    // OPTIMIZED USAGE TRACKING APP
+    // ═══════════════════════════════════════════════════════════════════
+
+    const app = {
+      // State management
+      state: {
+        statsData: null,
+        fullData: null,
+        processedSessions: null,
+        accordionStates: [false, false, false, false, false],
+        autoRefreshInterval: null,
+        lastFetch: null,
+        isRefreshing: false,
+        searchQuery: ''
+      },
+
+      // Cache duration (5 minutes)
+      CACHE_DURATION: 5 * 60 * 1000,
+
+      // ═══════════════════════════════════════════════════════════════
+      // INITIALIZATION
+      // ═══════════════════════════════════════════════════════════════
+
+      async init() {
+        await this.loadData();
+      },
+
+      // ═══════════════════════════════════════════════════════════════
+      // DATA FETCHING (Optimized with caching)
+      // ═══════════════════════════════════════════════════════════════
+
+      async loadData(force = false) {
+        // Check cache first (unless forced refresh)
+        if (!force && this.state.lastFetch &&
+            (Date.now() - this.state.lastFetch < this.CACHE_DURATION)) {
+          console.log('Using cached data');
+          this.render();
+          return;
+        }
+
+        if (this.state.isRefreshing) {
+          console.log('Already refreshing...');
+          return;
+        }
+
+        this.state.isRefreshing = true;
+        this.updateRefreshButton(true);
+
+        try {
+          // OPTIMIZATION: Fetch both endpoints in parallel
+          const [statsResponse, fullDataResponse] = await Promise.all([
+            fetch('/stats'),
+            fetch('/tracking_data_live')
+          ]);
+
+          if (!statsResponse.ok || !fullDataResponse.ok) {
+            throw new Error('Failed to load data');
+          }
+
+          this.state.statsData = await statsResponse.json();
+          this.state.fullData = await fullDataResponse.json();
+          this.state.lastFetch = Date.now();
+
+          // OPTIMIZATION: Process sessions once and cache
+          this.state.processedSessions = this.processSessions();
+
+          this.render();
+
+        } catch (error) {
+          this.renderError(error.message);
+        } finally {
+          this.state.isRefreshing = false;
+          this.updateRefreshButton(false);
+          this.updateLastUpdatedTime();
+        }
+      },
+
+      // ═══════════════════════════════════════════════════════════════
+      // DATA PROCESSING (Single-pass optimization)
+      // ═══════════════════════════════════════════════════════════════
+
+      processSessions() {
+        const sessions = this.state.fullData?.sessions;
+        if (!sessions) return null;
+
+        const now = new Date();
+        const todayStart = new Date(now);
+        todayStart.setHours(0, 0, 0, 0);
+        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+        // OPTIMIZATION: Single pass through sessions, categorize all at once
+        const categories = {
+          today: [],
+          thisWeek: [],
+          last30Days: [],
+          collaborators: [],
+          archived: []
+        };
+
+        // Convert to array and sort once
+        const sortedSessions = Object.entries(sessions)
+          .sort((a, b) => new Date(b[1].started) - new Date(a[1].started));
+
+        // OPTIMIZATION: Single iteration to categorize
+        sortedSessions.forEach(([sessionId, session]) => {
+          const sessionDate = new Date(session.started);
+          const sessionObj = { id: sessionId, ...session };
+
+          if (session.archived) {
+            categories.archived.push(sessionObj);
+          } else if (session.collaborator) {
+            categories.collaborators.push(sessionObj);
+          } else {
+            // Active student sessions
+            if (sessionDate >= todayStart) {
+              categories.today.push(sessionObj);
+            }
+            if (sessionDate >= oneWeekAgo) {
+              categories.thisWeek.push(sessionObj);
+            }
+            if (sessionDate >= thirtyDaysAgo) {
+              categories.last30Days.push(sessionObj);
+            }
+          }
+        });
+
+        return categories;
+      },
+
+      // ═══════════════════════════════════════════════════════════════
+      // RENDERING
+      // ═══════════════════════════════════════════════════════════════
+
+      render() {
+        const content = document.getElementById('content');
+        const data = this.state.statsData;
+        const sessions = this.state.processedSessions;
+
+        if (!data || !sessions) {
+          content.innerHTML = '<div class="loading">No data available</div>';
+          return;
+        }
+
+        // OPTIMIZATION: Build HTML structure once
+        content.innerHTML = `
+          <div class="section">
+            <h2>📈 Overview</h2>
+            <p style="color: #6b7280; margin-bottom: 16px;">Generated at: ${data.generated_at}</p>
+
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value">${data.summary.total_unique_users}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Total Sessions</div>
+                <div class="stat-value">${data.summary.total_sessions}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Problems Solved</div>
+                <div class="stat-value">${data.summary.total_problems_solved}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Avg Session Time</div>
+                <div class="stat-value">${data.summary.average_session_minutes}<span style="font-size: 16px; color: #6b7280;"> min</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>📅 Today's Activity</h2>
+            <p style="color: #6b7280; margin-bottom: 8px;">${data.today.date}</p>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-label">Unique Users Today</div>
+                <div class="stat-value">${data.today.unique_users}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Sessions Today</div>
+                <div class="stat-value">${data.today.sessions}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>📚 Usage by Unit</h2>
+            ${this.renderTable(data.by_unit, 'Unit', 'Sessions')}
+          </div>
+
+          <div class="section">
+            <h2>🎯 Usage by Support Level</h2>
+            ${this.renderTable(data.by_support_level, 'Support Level', 'Sessions')}
+          </div>
+
+          <div class="section">
+            <h2>💡 Help Features Used</h2>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-label">Total Hints</div>
+                <div class="stat-value">${data.help_usage.total_hints_requested}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">"Show Me Why" Clicks</div>
+                <div class="stat-value">${data.help_usage.total_why_requested}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Avg Hints/Session</div>
+                <div class="stat-value">${data.help_usage.average_hints_per_session.toFixed(1)}</div>
+              </div>
+            </div>
+          </div>
+
+          ${this.renderSessionHistory(sessions)}
+        `;
+
+        // Restore accordion states
+        this.restoreAccordionStates();
+      },
+
+      renderTable(data, col1Header, col2Header) {
+        if (!data || Object.keys(data).length === 0) {
+          return '<div class="empty-state">No data available</div>';
+        }
+
+        const rows = Object.entries(data)
+          .sort((a, b) => b[1] - a[1])
+          .map(([key, value]) => `
+            <tr>
+              <td><strong>${this.escapeHtml(key)}</strong></td>
+              <td>${value}</td>
+            </tr>
+          `).join('');
+
+        return `
+          <table>
+            <thead>
+              <tr>
+                <th>${col1Header}</th>
+                <th>${col2Header}</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        `;
+      },
+
+      renderSessionHistory(sessions) {
+        return `
+          <div class="section">
+            <h2>📝 Session History</h2>
+
+            ${this.renderAccordion(0, '📅 Today', sessions.today)}
+            ${this.renderAccordion(1, '📆 This Week', sessions.thisWeek)}
+            ${this.renderAccordion(2, '📊 Past 30 Days', sessions.last30Days)}
+            ${this.renderAccordion(3, '🎓 Student Collaborators', sessions.collaborators, true)}
+            ${this.renderAccordion(4, '🗄️ Archived (Test Sessions)', sessions.archived)}
+          </div>
+        `;
+      },
+
+      // OPTIMIZATION: Lazy loading - only render table when accordion opens
+      renderAccordion(index, title, sessions, showRole = false) {
+        const isActive = this.state.accordionStates[index];
+        const filteredSessions = this.filterSessionsList(sessions);
+
+        return `
+          <div class="accordion-item">
+            <div class="accordion-header ${isActive ? 'active' : ''}"
+                 id="accordion-header-${index}"
+                 onclick="app.toggleAccordion(${index})">
+              <span class="accordion-title">${title}</span>
+              <span class="accordion-count">${filteredSessions.length}</span>
+            </div>
+            <div class="accordion-content ${isActive ? 'active' : ''}" id="accordion-content-${index}">
+              ${isActive ? this.renderSessionTable(filteredSessions, showRole) : ''}
+            </div>
+          </div>
+        `;
+      },
+
+      renderSessionTable(sessions, showRole = false) {
+        if (sessions.length === 0) {
+          return '<div class="empty-state">No sessions in this period</div>';
+        }
+
+        const rows = sessions.map(session => this.createSessionRow(session, showRole)).join('');
+
+        return `
+          <table>
+            <thead>
+              <tr>
+                <th>Student Name</th>
+                <th>Unit</th>
+                <th>Support Level</th>
+                <th>Started</th>
+                <th>Duration</th>
+                <th>Hints</th>
+                <th>"Show Why"</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        `;
+      },
+
+      createSessionRow(session, showRole = false) {
+        const user = this.state.fullData.users?.[session.user_token];
+        const userName = this.escapeHtml(user?.name || 'Anonymous');
+        const duration = session.duration_seconds
+          ? Math.round(session.duration_seconds / 60)
+          : 'In progress';
+
+        const roleInfo = showRole && session.collaborator
+          ? `<br><span style="color: #059669; font-size: 12px; font-weight: 600;">${this.escapeHtml(session.collaborator_role || 'Collaborator')}</span>`
+          : '';
+
+        return `
+          <tr data-search="${userName.toLowerCase()} ${(session.module || '').toLowerCase()} ${(session.mode || '').toLowerCase()}">
+            <td><strong>${userName}</strong>${roleInfo}</td>
+            <td>${this.escapeHtml(session.module || 'Unknown')}</td>
+            <td>${this.escapeHtml(session.mode || 'Standard')}</td>
+            <td>${new Date(session.started).toLocaleString()}</td>
+            <td>${duration}${typeof duration === 'number' ? ' min' : ''}</td>
+            <td>${session.hints_requested || session.hint_count || 0}</td>
+            <td>${session.why_requested || session.why_count || 0}</td>
+          </tr>
+        `;
+      },
+
+      renderError(message) {
+        document.getElementById('content').innerHTML = `
+          <div class="error">
+            <strong>Error loading data:</strong> ${this.escapeHtml(message)}
+          </div>
+        `;
+      },
+
+      // ═══════════════════════════════════════════════════════════════
+      // ACCORDION MANAGEMENT (with state preservation)
+      // ═══════════════════════════════════════════════════════════════
+
+      toggleAccordion(index) {
+        this.state.accordionStates[index] = !this.state.accordionStates[index];
+
+        const header = document.getElementById(`accordion-header-${index}`);
+        const content = document.getElementById(`accordion-content-${index}`);
+
+        header.classList.toggle('active');
+        content.classList.toggle('active');
+
+        // OPTIMIZATION: Lazy load table content when opening
+        if (this.state.accordionStates[index] && content.innerHTML.trim() === '') {
+          const categories = ['today', 'thisWeek', 'last30Days', 'collaborators', 'archived'];
+          const sessions = this.state.processedSessions[categories[index]];
+          const showRole = index === 3; // Collaborators
+          const filteredSessions = this.filterSessionsList(sessions);
+          content.innerHTML = this.renderSessionTable(filteredSessions, showRole);
+        }
+      },
+
+      restoreAccordionStates() {
+        this.state.accordionStates.forEach((isActive, index) => {
+          if (isActive) {
+            const header = document.getElementById(`accordion-header-${index}`);
+            const content = document.getElementById(`accordion-content-${index}`);
+            if (header && content) {
+              header.classList.add('active');
+              content.classList.add('active');
+            }
+          }
+        });
+      },
+
+      // ═══════════════════════════════════════════════════════════════
+      // SEARCH/FILTER
+      // ═══════════════════════════════════════════════════════════════
+
+      filterSessions() {
+        const query = document.getElementById('searchBox').value.toLowerCase();
+        this.state.searchQuery = query;
+
+        // Re-render to apply filter
+        this.render();
+      },
+
+      filterSessionsList(sessions) {
+        if (!this.state.searchQuery) return sessions;
+
+        return sessions.filter(session => {
+          const user = this.state.fullData.users?.[session.user_token];
+          const userName = (user?.name || 'Anonymous').toLowerCase();
+          const module = (session.module || '').toLowerCase();
+          const mode = (session.mode || '').toLowerCase();
+
+          return userName.includes(this.state.searchQuery) ||
+                 module.includes(this.state.searchQuery) ||
+                 mode.includes(this.state.searchQuery);
+        });
+      },
+
+      // ═══════════════════════════════════════════════════════════════
+      // AUTO-REFRESH
+      // ═══════════════════════════════════════════════════════════════
+
+      toggleAutoRefresh() {
+        const checkbox = document.getElementById('autoRefreshToggle');
+
+        if (checkbox.checked) {
+          // Start auto-refresh (30 seconds)
+          this.state.autoRefreshInterval = setInterval(() => {
+            this.refresh();
+          }, 30000);
+          console.log('Auto-refresh enabled (30s)');
+        } else {
+          // Stop auto-refresh
+          if (this.state.autoRefreshInterval) {
+            clearInterval(this.state.autoRefreshInterval);
+            this.state.autoRefreshInterval = null;
+          }
+          console.log('Auto-refresh disabled');
+        }
+      },
+
+      // ═══════════════════════════════════════════════════════════════
+      // MANUAL REFRESH (Debounced)
+      // ═══════════════════════════════════════════════════════════════
+
+      async refresh() {
+        await this.loadData(true); // Force refresh (bypass cache)
+      },
+
+      updateRefreshButton(isRefreshing) {
+        const btn = document.getElementById('refreshBtn');
+        const text = document.getElementById('refreshText');
+
+        if (isRefreshing) {
+          btn.disabled = true;
+          text.innerHTML = '<span class="spinner"></span> Refreshing...';
+        } else {
+          btn.disabled = false;
+          text.innerHTML = '🔄 Refresh Data';
+        }
+      },
+
+      updateLastUpdatedTime() {
+        const elem = document.getElementById('lastUpdated');
+        if (this.state.lastFetch) {
+          const time = new Date(this.state.lastFetch).toLocaleTimeString();
+          elem.textContent = `Last updated: ${time}`;
+        }
+      },
+
+      // ═══════════════════════════════════════════════════════════════
+      // EXPORT TO CSV
+      // ═══════════════════════════════════════════════════════════════
+
+      exportToCSV() {
+        if (!this.state.processedSessions) {
+          alert('No data to export');
+          return;
+        }
+
+        // Combine all sessions
+        const allSessions = [
+          ...this.state.processedSessions.today,
+          ...this.state.processedSessions.thisWeek,
+          ...this.state.processedSessions.last30Days,
+          ...this.state.processedSessions.collaborators,
+          ...this.state.processedSessions.archived
+        ];
+
+        // Remove duplicates (sessions may appear in multiple categories)
+        const uniqueSessions = Array.from(
+          new Map(allSessions.map(s => [s.id, s])).values()
+        );
+
+        // Build CSV
+        const headers = ['Student Name', 'Unit', 'Support Level', 'Started', 'Duration (min)', 'Hints', 'Show Why', 'Type'];
+        const rows = uniqueSessions.map(session => {
+          const user = this.state.fullData.users?.[session.user_token];
+          const userName = user?.name || 'Anonymous';
+          const duration = session.duration_seconds
+            ? Math.round(session.duration_seconds / 60)
+            : '';
+
+          let type = 'Active';
+          if (session.archived) type = 'Archived';
+          else if (session.collaborator) type = 'Collaborator';
+
+          return [
+            userName,
+            session.module || 'Unknown',
+            session.mode || 'Standard',
+            new Date(session.started).toLocaleString(),
+            duration,
+            session.hints_requested || session.hint_count || 0,
+            session.why_requested || session.why_count || 0,
+            type
+          ];
+        });
+
+        const csv = [
+          headers.join(','),
+          ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ].join('\n');
+
+        // Download
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `usage-report-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        console.log(`Exported ${uniqueSessions.length} sessions to CSV`);
+      },
+
+      // ═══════════════════════════════════════════════════════════════
+      // UTILITIES
+      // ═══════════════════════════════════════════════════════════════
+
+      escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+    };
+
+    // Initialize app on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      app.init();
+    });
+  </script>
+</body>
+</html>
