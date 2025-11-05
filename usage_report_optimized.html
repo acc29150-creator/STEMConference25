@@ -308,7 +308,7 @@
         statsData: null,
         fullData: null,
         processedSessions: null,
-        accordionStates: [false, false, false, false, false],
+        accordionStates: [false, false, false, false, false, false],
         autoRefreshInterval: null,
         lastFetch: null,
         isRefreshing: false,
@@ -385,18 +385,20 @@
         if (!sessions) return null;
 
         const now = new Date();
-        const todayStart = new Date(now);
-        todayStart.setHours(0, 0, 0, 0);
-        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
         const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+        const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
 
         // OPTIMIZATION: Single pass through sessions, categorize all at once
         const categories = {
-          today: [],
-          thisWeek: [],
-          last30Days: [],
-          collaborators: [],
-          archived: []
+          past7Days: [],
+          past14Days: [],
+          past30Days: [],
+          past60Days: [],
+          archived90Plus: [],
+          collaborators: []
         };
 
         // Convert to array and sort once
@@ -408,20 +410,29 @@
           const sessionDate = new Date(session.started);
           const sessionObj = { id: sessionId, ...session };
 
-          if (session.archived) {
-            categories.archived.push(sessionObj);
-          } else if (session.collaborator) {
+          // Separate collaborators
+          if (session.collaborator) {
             categories.collaborators.push(sessionObj);
-          } else {
-            // Active student sessions
-            if (sessionDate >= todayStart) {
-              categories.today.push(sessionObj);
+          }
+          // Archive sessions older than 90 days (max 100)
+          else if (sessionDate < ninetyDaysAgo) {
+            if (categories.archived90Plus.length < 100) {
+              categories.archived90Plus.push(sessionObj);
             }
-            if (sessionDate >= oneWeekAgo) {
-              categories.thisWeek.push(sessionObj);
+          }
+          // Active student sessions by time period
+          else {
+            if (sessionDate >= sevenDaysAgo) {
+              categories.past7Days.push(sessionObj);
+            }
+            if (sessionDate >= fourteenDaysAgo) {
+              categories.past14Days.push(sessionObj);
             }
             if (sessionDate >= thirtyDaysAgo) {
-              categories.last30Days.push(sessionObj);
+              categories.past30Days.push(sessionObj);
+            }
+            if (sessionDate >= sixtyDaysAgo) {
+              categories.past60Days.push(sessionObj);
             }
           }
         });
@@ -470,16 +481,27 @@
           </div>
 
           <div class="section">
-            <h2>📅 Today's Activity</h2>
-            <p style="color: #6b7280; margin-bottom: 8px;">${data.today.date}</p>
+            <h2>👥 Active Users by Time Period</h2>
             <div class="stats-grid">
               <div class="stat-card">
-                <div class="stat-label">Unique Users Today</div>
-                <div class="stat-value">${data.today.unique_users}</div>
+                <div class="stat-label">Past 7 Days</div>
+                <div class="stat-value">${this.getUniqueUserCount(sessions.past7Days)}</div>
               </div>
               <div class="stat-card">
-                <div class="stat-label">Sessions Today</div>
-                <div class="stat-value">${data.today.sessions}</div>
+                <div class="stat-label">Past 14 Days</div>
+                <div class="stat-value">${this.getUniqueUserCount(sessions.past14Days)}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Past 30 Days</div>
+                <div class="stat-value">${this.getUniqueUserCount(sessions.past30Days)}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Past 60 Days</div>
+                <div class="stat-value">${this.getUniqueUserCount(sessions.past60Days)}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Archived (90+)</div>
+                <div class="stat-value">${this.getUniqueUserCount(sessions.archived90Plus)}</div>
               </div>
             </div>
           </div>
@@ -553,11 +575,12 @@
           <div class="section">
             <h2>📝 Session History</h2>
 
-            ${this.renderAccordion(0, '📅 Today', sessions.today)}
-            ${this.renderAccordion(1, '📆 This Week', sessions.thisWeek)}
-            ${this.renderAccordion(2, '📊 Past 30 Days', sessions.last30Days)}
-            ${this.renderAccordion(3, '🎓 Student Collaborators', sessions.collaborators, true)}
-            ${this.renderAccordion(4, '🗄️ Archived (Test Sessions)', sessions.archived)}
+            ${this.renderAccordion(0, '📅 Past 7 Days', sessions.past7Days)}
+            ${this.renderAccordion(1, '📆 Past 14 Days', sessions.past14Days)}
+            ${this.renderAccordion(2, '📊 Past 30 Days', sessions.past30Days)}
+            ${this.renderAccordion(3, '📈 Past 60 Days', sessions.past60Days)}
+            ${this.renderAccordion(4, '🎓 Student Collaborators', sessions.collaborators, true)}
+            ${this.renderAccordion(5, '🗄️ Archived (90+ Days, Max 100)', sessions.archived90Plus)}
           </div>
         `;
       },
@@ -595,11 +618,11 @@
               <tr>
                 <th>Student Name</th>
                 <th>Unit</th>
-                <th>Support Level</th>
-                <th>Started</th>
-                <th>Duration</th>
+                <th>Mode</th>
+                <th>Time Spent</th>
                 <th>Hints</th>
-                <th>"Show Why"</th>
+                <th>Calculator Use</th>
+                <th>Wrong Responses</th>
               </tr>
             </thead>
             <tbody>
@@ -620,15 +643,20 @@
           ? `<br><span style="color: #059669; font-size: 12px; font-weight: 600;">${this.escapeHtml(session.collaborator_role || 'Collaborator')}</span>`
           : '';
 
+        // Get session data with fallbacks
+        const hints = session.hints_requested || session.hint_count || 0;
+        const calculatorUse = session.calculator_used || session.calculator_count || 0;
+        const wrongResponses = session.wrong_responses || session.incorrect_count || 0;
+
         return `
           <tr data-search="${userName.toLowerCase()} ${(session.module || '').toLowerCase()} ${(session.mode || '').toLowerCase()}">
             <td><strong>${userName}</strong>${roleInfo}</td>
             <td>${this.escapeHtml(session.module || 'Unknown')}</td>
             <td>${this.escapeHtml(session.mode || 'Standard')}</td>
-            <td>${new Date(session.started).toLocaleString()}</td>
             <td>${duration}${typeof duration === 'number' ? ' min' : ''}</td>
-            <td>${session.hints_requested || session.hint_count || 0}</td>
-            <td>${session.why_requested || session.why_count || 0}</td>
+            <td>${hints}</td>
+            <td>${calculatorUse}</td>
+            <td>${wrongResponses}</td>
           </tr>
         `;
       },
@@ -656,9 +684,9 @@
 
         // OPTIMIZATION: Lazy load table content when opening
         if (this.state.accordionStates[index] && content.innerHTML.trim() === '') {
-          const categories = ['today', 'thisWeek', 'last30Days', 'collaborators', 'archived'];
+          const categories = ['past7Days', 'past14Days', 'past30Days', 'past60Days', 'collaborators', 'archived90Plus'];
           const sessions = this.state.processedSessions[categories[index]];
-          const showRole = index === 3; // Collaborators
+          const showRole = index === 4; // Collaborators
           const filteredSessions = this.filterSessionsList(sessions);
           content.innerHTML = this.renderSessionTable(filteredSessions, showRole);
         }
@@ -768,11 +796,12 @@
 
         // Combine all sessions
         const allSessions = [
-          ...this.state.processedSessions.today,
-          ...this.state.processedSessions.thisWeek,
-          ...this.state.processedSessions.last30Days,
+          ...this.state.processedSessions.past7Days,
+          ...this.state.processedSessions.past14Days,
+          ...this.state.processedSessions.past30Days,
+          ...this.state.processedSessions.past60Days,
           ...this.state.processedSessions.collaborators,
-          ...this.state.processedSessions.archived
+          ...this.state.processedSessions.archived90Plus
         ];
 
         // Remove duplicates (sessions may appear in multiple categories)
@@ -780,8 +809,8 @@
           new Map(allSessions.map(s => [s.id, s])).values()
         );
 
-        // Build CSV
-        const headers = ['Student Name', 'Unit', 'Support Level', 'Started', 'Duration (min)', 'Hints', 'Show Why', 'Type'];
+        // Build CSV with new columns
+        const headers = ['Student Name', 'Unit', 'Mode', 'Time Spent (min)', 'Hints', 'Calculator Use', 'Wrong Responses', 'Type'];
         const rows = uniqueSessions.map(session => {
           const user = this.state.fullData.users?.[session.user_token];
           const userName = user?.name || 'Anonymous';
@@ -790,17 +819,21 @@
             : '';
 
           let type = 'Active';
-          if (session.archived) type = 'Archived';
-          else if (session.collaborator) type = 'Collaborator';
+          if (session.collaborator) type = 'Collaborator';
+          else {
+            const sessionDate = new Date(session.started);
+            const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+            if (sessionDate < ninetyDaysAgo) type = 'Archived (90+)';
+          }
 
           return [
             userName,
             session.module || 'Unknown',
             session.mode || 'Standard',
-            new Date(session.started).toLocaleString(),
             duration,
             session.hints_requested || session.hint_count || 0,
-            session.why_requested || session.why_count || 0,
+            session.calculator_used || session.calculator_count || 0,
+            session.wrong_responses || session.incorrect_count || 0,
             type
           ];
         });
@@ -827,6 +860,12 @@
       // ═══════════════════════════════════════════════════════════════
       // UTILITIES
       // ═══════════════════════════════════════════════════════════════
+
+      getUniqueUserCount(sessions) {
+        if (!sessions || sessions.length === 0) return 0;
+        const uniqueTokens = new Set(sessions.map(s => s.user_token));
+        return uniqueTokens.size;
+      },
 
       escapeHtml(text) {
         const div = document.createElement('div');
