@@ -410,15 +410,15 @@ EMAIL_SETTINGS = {
     # SMTP Server Configuration
     # For Gmail: Use "smtp.gmail.com" with port 587
     # For Outlook: Use "smtp-mail.outlook.com" with port 587
-    # For institutional email: Contact your IT department
-    "smtp_host": "smtp.gmail.com",
+    # For Chattanooga State email: Contact IT for SMTP settings or use Gmail with app password
+    "smtp_host": "smtp.gmail.com",  # Change if using Chattanooga State SMTP server
     "smtp_port": 587,
 
     # Authentication
     # IMPORTANT: For Gmail, create an "App Password" instead of using your regular password
     # Go to: Google Account → Security → 2-Step Verification → App passwords
-    "smtp_user": "",  # Your email address (e.g., "april.crenshaw@chattanoogastate.edu")
-    "smtp_password": "",  # Your app-specific password (NOT your regular password)
+    "smtp_user": "april.crenshaw@chattanoogastate.edu",
+    "smtp_password": "",  # TODO: Add your Gmail app-specific password here
 
     # Email Addresses
     "from_email": "math1710-tutor@chattanoogastate.edu",
