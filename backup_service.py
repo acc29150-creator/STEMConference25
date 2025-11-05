@@ -415,13 +415,13 @@ class BackupService:
 class AutoBackupScheduler:
     """Automatically backs up data at regular intervals."""
 
-    def __init__(self, backup_service: BackupService, interval_hours: int = 6):
+    def __init__(self, backup_service: BackupService, interval_hours: int = 12):
         """
         Initialize the auto-backup scheduler.
 
         Args:
             backup_service: BackupService instance
-            interval_hours: Hours between backups (default: 6)
+            interval_hours: Hours between backups (default: 12)
         """
         self.backup_service = backup_service
         self.interval_seconds = interval_hours * 3600

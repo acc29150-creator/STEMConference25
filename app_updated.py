@@ -147,8 +147,8 @@ def init_openai():
         reports=TRACKING["reports"]
     )
 
-    # Start automatic backups every 6 hours
-    auto_backup = AutoBackupScheduler(backup_service, interval_hours=6)
+    # Start automatic backups every 12 hours
+    auto_backup = AutoBackupScheduler(backup_service, interval_hours=12)
     auto_backup.start(lambda: (TRACKING["users"], TRACKING["sessions"], TRACKING["reports"]))
 
 @app.on_event("shutdown")
