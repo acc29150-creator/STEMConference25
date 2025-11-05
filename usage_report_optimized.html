@@ -574,7 +574,30 @@
           past30Days: [],
           past60Days: [],
           archived90Plus: [],
-          collaborators: []
+          colleagues: [],          // NEW: Faculty/staff with first+last name
+          studentCollaborators: [] // NEW: David Escalante, David, Kavin
+        };
+
+        // Student collaborator names to identify
+        const studentCollabNames = ['david escalante', 'david', 'kavin'];
+
+        // Helper function to identify user type
+        const identifyUserType = (session) => {
+          const userName = (session.user_name || '').toLowerCase().trim();
+
+          // Check if it's a known student collaborator
+          if (studentCollabNames.includes(userName)) {
+            return 'studentCollaborator';
+          }
+
+          // Check if name has space (first + last name) = colleague
+          // But exclude our student collaborators
+          if (userName.includes(' ')) {
+            return 'colleague';
+          }
+
+          // Regular student (first name only)
+          return 'student';
         };
 
         // Convert to array and sort once
@@ -585,10 +608,15 @@
         sortedSessions.forEach(([sessionId, session]) => {
           const sessionDate = new Date(session.started);
           const sessionObj = { id: sessionId, ...session };
+          const userType = identifyUserType(session);
 
-          // Separate collaborators
-          if (session.collaborator) {
-            categories.collaborators.push(sessionObj);
+          // Separate colleagues (faculty/staff)
+          if (userType === 'colleague') {
+            categories.colleagues.push(sessionObj);
+          }
+          // Separate student collaborators (David Escalante, David, Kavin)
+          else if (userType === 'studentCollaborator') {
+            categories.studentCollaborators.push(sessionObj);
           }
           // Archive sessions older than 90 days (max 100)
           else if (sessionDate < ninetyDaysAgo) {
@@ -621,6 +649,7 @@
       // ═══════════════════════════════════════════════════════════════
 
       getStudentsNeedingAttention() {
+        // Only include actual students (exclude colleagues and student collaborators)
         const allActiveSessions = [
           ...this.state.processedSessions.past7Days,
           ...this.state.processedSessions.past14Days,
@@ -1311,8 +1340,9 @@
             ${this.renderAccordion(1, '📆 Past 14 Days', sessions.past14Days)}
             ${this.renderAccordion(2, '📊 Past 30 Days', sessions.past30Days)}
             ${this.renderAccordion(3, '📈 Past 60 Days', sessions.past60Days)}
-            ${this.renderAccordion(4, '🎓 Colleagues and Student Collaborators', sessions.collaborators, true)}
-            ${this.renderAccordion(5, '🗄️ Archived (90+ Days, Max 100)', sessions.archived90Plus)}
+            ${this.renderAccordion(4, '👥 Colleagues (Faculty/Staff)', sessions.colleagues, true)}
+            ${this.renderAccordion(5, '🎓 Student Collaborators (David, Kavin)', sessions.studentCollaborators, true)}
+            ${this.renderAccordion(6, '🗄️ Archived (90+ Days, Max 100)', sessions.archived90Plus)}
           </div>
         `;
       },
