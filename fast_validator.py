@@ -645,3 +645,68 @@ if __name__ == "__main__":
     # Get statistics
     stats = validator.get_stats()
     print("Statistics:", stats)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FAST VALIDATOR - UTILITY CLASS FOR MULTIPLE CHOICE VALIDATION
+# ═══════════════════════════════════════════════════════════════════════════
+
+class FastValidator:
+    """
+    Utility class for fast multiple choice validation.
+    Provides static methods for extracting and validating MC questions.
+    """
+
+    @staticmethod
+    def extract_mc_options(text: str) -> Optional[Dict[str, str]]:
+        """
+        Extract multiple choice options from AI response text.
+
+        Args:
+            text: AI response text containing MC options
+
+        Returns:
+            Dict mapping option letters to option text, or None if no options found
+            Example: {"A": "Add 5", "B": "Subtract 5", "C": "Multiply by 5", "D": "I'm not sure"}
+        """
+        options = {}
+
+        # Pattern to match multiple choice options like "A) Some text"
+        pattern = r'^([A-D])\)\s*(.+)$'
+
+        for line in text.split('\n'):
+            line = line.strip()
+            match = re.match(pattern, line)
+            if match:
+                letter = match.group(1)
+                option_text = match.group(2).strip()
+                options[letter] = option_text
+
+        # Only return if we found valid options (at least 2)
+        return options if len(options) >= 2 else None
+
+    @staticmethod
+    def validate(student_choice: str, question: str, options: Dict[str, str]) -> Optional[bool]:
+        """
+        Validate a student's multiple choice answer.
+
+        This is a simple validation for straightforward MC questions.
+        For now, it returns None to indicate we should use AI validation,
+        since determining the "correct" answer requires understanding the question context.
+
+        Args:
+            student_choice: Student's answer (A, B, C, or D)
+            question: The question text
+            options: Dict of options
+
+        Returns:
+            None (indicates AI validation should be used)
+
+        Note: This could be enhanced in the future to handle simple cases like:
+        - Questions with embedded correct answer tags
+        - Pattern-based validation for arithmetic
+        """
+        # For now, return None to indicate we should use AI validation
+        # This allows the infrastructure to be in place while validation logic
+        # is handled by the AI with VERIFICATION_PROMPT
+        return None
