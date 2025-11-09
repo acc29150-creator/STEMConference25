@@ -331,7 +331,7 @@ SCAFFOLDING_MODES = {
         "explain_why_after_correct": False,  # Don't explain unless asked
         "auto_upgrade_on_struggle": "step_by_step",
         "step_size": "large",  # Combine multiple micro-steps into one question
-        "student_display": "Quick Hints",
+        "student_display": "Just a Hint",
         "description": "Just need quick pointers - I'll ask what to do, you answer, I'll confirm and show the result"
     },
 
@@ -344,7 +344,7 @@ SCAFFOLDING_MODES = {
         "explain_why_after_correct": True,  # Brief "why" after confirming correct
         "auto_upgrade_on_struggle": "detailed_explanations",
         "step_size": "medium",  # Standard step-by-step
-        "student_display": "Step-by-Step",
+        "student_display": "Walk Me Through",
         "description": "Need to work through each step - I'll guide you through the problem with brief explanations"
     },
 
@@ -358,7 +358,7 @@ SCAFFOLDING_MODES = {
         "ask_why_questions": True,  # Ask students to explain reasoning
         "reteach_on_wrong": True,  # Reteach concept when wrong
         "step_size": "micro",  # Tiniest possible steps
-        "student_display": "Detailed Explanations",
+        "student_display": "Explain It All",
         "description": "Need everything explained - I'll explain each concept in detail, break into tiny steps, and check your understanding"
     }
 }
