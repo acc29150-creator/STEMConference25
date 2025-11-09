@@ -238,10 +238,6 @@
       .chat {
         height: 500px;
       }
-
-      .panel.initial-state .chat {
-        height: 200px; /* Smaller on tablet in initial state */
-      }
     }
 
     @media (max-width: 768px) {
@@ -281,10 +277,6 @@
         height: 520px;
       }
 
-      .panel.initial-state .chat {
-        height: 220px; /* Smaller on mobile in initial state */
-      }
-
       .compose {
         grid-template-columns: 1fr;
       }
@@ -304,73 +296,19 @@
       border-radius: var(--radius);
       padding: 12px;
       box-shadow: 0 2px 8px var(--shadow);
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Initial state: input at top */
-    .panel.initial-state {
-      flex-direction: column-reverse;
-    }
-
-    .panel.initial-state .chat {
-      order: 2;
-      height: 300px; /* Smaller initially so input is visible */
-    }
-
-    .panel.initial-state .input-area {
-      order: 1;
-      margin-bottom: 12px;
-    }
-
-    /* After first message: normal order */
-    .panel:not(.initial-state) .chat {
-      order: 1;
-      height: 580px;
-    }
-
-    .panel:not(.initial-state) .input-area {
-      order: 2;
-    }
-
-    .input-area {
-      display: flex;
-      flex-direction: column;
     }
 
     /* ═══════════════════════════════════════════════════════════════
-       CHAT AREA - Message display (Notebook Paper Style)
+       CHAT AREA - Message display
        ═══════════════════════════════════════════════════════════════ */
     .chat {
       height: 580px;
       overflow-y: auto;
       scroll-behavior: smooth;
-      padding-right: 4px; /* Space for scrollbar */
-      background: linear-gradient(
-        to bottom,
-        transparent 0%,
-        transparent calc(100% - 1px),
-        #94a3b8 calc(100% - 1px),
-        #94a3b8 100%
-      );
-      background-size: 100% 28px; /* Line spacing */
-      background-color: #fefcf8; /* Cream paper color */
+      padding-right: 4px;
+      background: var(--bg-chat);
       border-radius: 12px;
       padding: 12px;
-      padding-left: 52px; /* Space for red margin line */
-      position: relative;
-    }
-
-    /* Red margin line (like notebook paper) */
-    .chat::before {
-      content: "";
-      position: absolute;
-      left: 40px;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: #ef4444;
-      opacity: 0.3;
     }
 
     /* Scrollbar styling (webkit browsers) */
@@ -544,20 +482,20 @@
       box-shadow: 0 0 0 3px rgba(37,99,235,.1);
     }
 
-    /* Photo button in compose area */
+    /* Photo/Upload - paperclip icon, no button */
     .btn-photo {
-      background: #d4a574;  /* Light tan background */
-      color: #1f2937;  /* Dark text for contrast */
-      padding: 12px 18px;  /* Match send button height */
-      font-size: 20px;
-      border: 2px solid #b8935f;  /* Darker tan border */
+      background: transparent;
+      color: #6b7280;
+      padding: 12px 14px;
+      font-size: 24px;
+      border: none;
       cursor: pointer;
-      font-weight: 800;  /* Match send button weight */
+      transition: all 0.2s;
     }
 
     .btn-photo:hover {
-      background: #b8935f;  /* Darker tan on hover */
-      color: white;
+      color: var(--blue-medium);
+      transform: scale(1.1);
     }
 
     /* Hidden file input */
@@ -955,17 +893,15 @@
          ═══════════════════════════════════════════════════════════ -->
     <div class="main">
       <!-- LEFT: Chat panel -->
-      <section class="panel initial-state" id="chatPanel">
+      <section class="panel" id="chatPanel">
         <!-- Message history -->
         <div id="chat" class="chat" role="log" aria-live="polite" aria-label="Chat messages"></div>
 
-        <!-- Input Area (starts at top, moves down after first message) -->
-        <div class="input-area">
         <!-- Math Symbols Toolbar -->
         <div class="math-toolbar">
           <button class="math-symbol" data-symbol="(" title="Left parenthesis">(</button>
           <button class="math-symbol" data-symbol=")" title="Right parenthesis">)</button>
-          <button class="math-symbol" data-symbol="/" title="Fraction bar">/</button>
+          <button class="math-symbol" data-symbol="∞" title="Infinity">∞</button>
           <button class="math-symbol" data-symbol="²" title="Squared">x²</button>
           <button class="math-symbol" data-symbol="³" title="Cubed">x³</button>
           <button class="math-symbol" data-symbol="√" title="Square root">√</button>
@@ -1003,7 +939,7 @@
             autocomplete="off"
           />
           <button id="photoBtn" class="btn btn-photo" aria-label="Attach photo" title="Add photo">
-            📷
+            📎
           </button>
           <button id="sendBtn" class="btn btn-send" aria-label="Send message">
             Send
@@ -1017,7 +953,6 @@
         <div id="preview" class="preview">
           <img id="previewImg" alt="Uploaded problem image" />
         </div>
-        </div><!-- End input-area -->
       </section>
 
       <!-- RIGHT: Settings sidebar -->
@@ -1728,12 +1663,6 @@ async function send(message) {
 
     // Mark step 3 complete after first message
     $("step3").classList.add("complete");
-
-    // Move input area to bottom after first message
-    const chatPanel = $("chatPanel");
-    if (chatPanel.classList.contains("initial-state")) {
-      chatPanel.classList.remove("initial-state");
-    }
 
   } catch (error) {
     addMsg("Can't reach the server right now. Try again in a moment.", "assistant");
