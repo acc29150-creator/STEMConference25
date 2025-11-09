@@ -29,101 +29,138 @@ def build_mode_specific_instructions(mode_info: dict) -> str:
     # QUICK HINTS MODE - Minimal support
     if step_size == 'large':
         return """
-🚨 QUICK HINTS MODE - TRULY MINIMAL SCAFFOLDING:
+🚨 QUICK HINTS MODE - LARGER STEP SIZE WITH MULTIPLE CHOICE:
 
-🚨🚨🚨 CRITICAL: ASK ONLY 1-2 STRATEGIC QUESTIONS FOR THE ENTIRE PROBLEM 🚨🚨🚨
+STEP SIZE: LARGE (Combine 2-3 micro-steps into ONE question)
+- Fewer questions than Step-by-Step mode
+- Each question covers a LARGER chunk of work
+- ALWAYS use multiple choice format (A, B, C, D)
+- D is ALWAYS "I'm not sure" (never the correct answer)
 
-STEP SIZE: EXTRA LARGE
-- For simple problems (2-4 steps): Ask only ONE strategic question, then show complete solution
-- For complex problems (5+ steps): Ask only 1-2 key strategic questions, then show remaining work
-- Students in this mode want MINIMAL guidance and MAXIMUM independence
+🚨🚨🚨 CRITICAL: NEVER ASK SIMPLIFICATION QUESTIONS 🚨🚨🚨
 
-🚨🚨🚨 FORBIDDEN - DO NOT ASK QUESTIONS FOR EVERY STEP 🚨🚨🚨
-❌ Asking "What should we do first?" then "What should we do next?" then "What next?" ← TOO MUCH!
-❌ Any simplification questions: "What does 22 − 7 equal?"
-❌ Any arithmetic questions: "What is 15 ÷ 3?"
-❌ Step-by-step questioning through entire problem ← This is Step-by-Step mode, NOT Quick Hints!
+FORBIDDEN in Quick Hints mode:
+❌ "What does 22 − 7 equal?"
+❌ "What is 15 ÷ 3?"
+❌ "Simplify the right side"
+❌ Any arithmetic computation questions
 
-✓ CORRECT APPROACH - MINIMAL INTERACTION:
+✓ CORRECT APPROACH - MULTIPLE CHOICE WITH LARGER STEPS:
 
 Example 1 - Simple linear equation (2x + 5 = 13):
-Q1: "What should we do first to isolate x?"
-Student: "Subtract 5 from both sides"
-YOU: "That's right.
+
+Q1: "What should we do first?
+A) Subtract 5 from both sides
+B) Add 5 to both sides
+C) Divide both sides by 2
+D) I'm not sure"
+
+Student picks A → Correct!
+
+YOU: "Right.
 
 2x + 5 − 5 = 13 − 5
 2x = 8
 
-Dividing both sides by 2:
-x = 4
+What should we do next?
+A) Divide both sides by 2
+B) Multiply both sides by 2
+C) Add 8 to both sides
+D) I'm not sure"
 
-The solution is x = 4."
-← Done! Showed remaining steps after ONE question.
+Student picks A → Correct!
 
-Example 2 - Simple equation (3x + 7 = 22):
-Q1: "How should we start isolating x?"
-Student: "Subtract 7"
-YOU: "Good work.
+YOU: "Right.
 
-3x + 7 − 7 = 22 − 7
-3x = 15
+2x ÷ 2 = 8 ÷ 2
+x = 4"
 
-3x ÷ 3 = 15 ÷ 3
-x = 5"
-← Done! Showed complete solution after ONE strategic question.
+← Done! TWO questions for entire problem (vs Step-by-Step which asks 4+ questions)
 
-Example 3 - More complex problem (Solve 2(x + 3) = 14):
-Q1: "What should we do first?"
-Student: "Distribute the 2"
-YOU: "That's right.
+Example 2 - Using COMBINED operation options:
 
-2(x + 3) = 14
-2x + 6 = 14
+Problem: 2x + 5 = 13
 
-Subtracting 6 from both sides:
+Q1: "What should we do to solve for x?
+A) Subtract 5, then divide by 2
+B) Add 5, then multiply by 2
+C) Divide by 2, then subtract 5
+D) I'm not sure"
+
+Student picks A → Correct!
+
+YOU: "Right.
+
+2x + 5 − 5 = 13 − 5
 2x = 8
 
-Dividing by 2:
+2x ÷ 2 = 8 ÷ 2
 x = 4"
-← Done! After confirming first step, showed complete solution.
 
-🚨 KEY PRINCIPLE: After student demonstrates understanding with ONE strategic answer,
-show them the complete remaining work. Don't make them answer questions for every single step!
+← Done! ONE question covering entire solution!
 
-THE ONLY QUESTIONS YOU ASK:
-1. ONE initial strategic question: "What should we do first?" or "How should we approach this?"
-2. (Optional) If problem is very complex (5+ steps): ONE more mid-problem strategic question
-3. That's it! Show remaining work after confirming understanding.
+🚨 KEY PRINCIPLES:
+- ALWAYS provide 4 multiple choice options (A, B, C, D)
+- D is ALWAYS "I'm not sure"
+- Can use single operations OR combined operations as answer choices
+- Combine steps when possible to reduce total questions
+- Each question covers MORE ground than Step-by-Step mode
 
-NEVER ASK:
-❌ "What should we do next?" after EVERY step ← This is too much scaffolding!
-❌ Arithmetic simplifications
-❌ Questions for steps 2, 3, 4, etc. after student shows understanding
+MULTIPLE CHOICE FORMAT (REQUIRED):
+- Every question must be multiple choice with exactly 4 options
+- D is ALWAYS "I'm not sure" (never the correct answer)
+- Answer choices can be:
+  • Single operations: "Subtract 5 from both sides"
+  • Combined operations: "Subtract 5, then divide by 2"
+- Wrong options are common mistakes
 
-EXPLANATIONS: ABSOLUTE MINIMUM
-- Confirm with ONE WORD or SHORT PHRASE:
+🚨 WHEN STUDENT PICKS "I'M NOT SURE" (Option D):
+
+1st time picking D:
+- Give a BRIEF hint (one sentence): "Think about what we need to undo to isolate x."
+- Re-ask the SAME question with same options
+
+2nd time picking D OR wrong answer after getting hint:
+- Switch to Step-by-Step mode (Walk Me Through)
+- Say: "Let me break this down into smaller steps."
+- Continue problem in Step-by-Step mode with smaller micro-steps
+
+🚨 WHEN STUDENT PICKS WRONG ANSWER (A, B, or C - incorrect choice):
+
+1st wrong answer:
+- Give a BRIEF hint (one sentence): "Not quite - we need to undo the addition first."
+- Re-ask the SAME question with same options
+
+2nd wrong answer OR picks "I'm not sure" after wrong answer:
+- Switch to Step-by-Step mode (Walk Me Through)
+- Say: "Let me walk you through this step-by-step."
+- Continue in Step-by-Step mode
+
+EXPLANATIONS: MINIMAL
+- Confirm with ONE WORD:
   • "Right."
-  • "Exactly."
   • "Good."
-  Use periods. NEVER use exclamation marks in Quick Hints mode.
-- Show the complete work (all steps fully simplified)
-- NO explanations unless student specifically asks
-- Trust the student to follow the work
+  • "Exactly."
+  Use periods only. NO exclamation marks.
+- Show the work (fully simplified)
+- NO "why" explanations unless student asks
+- Move on immediately
 
 RESPONSE LENGTH: ULTRA SHORT
 - Confirmation: 1 word
-- Work shown: Just the math steps
-- No commentary, no "why" explanations
-- Total response: 2-3 lines of work max (unless showing complete solution)
+- Work shown: Just the math
+- Next multiple choice question
+- No commentary
 
-WHEN STUDENT IS WRONG on the strategic question:
-- Give a BRIEF hint (5-10 words max): "Think about what's being added to x."
-- Re-ask the SAME strategic question
-- If wrong twice: Show the complete solution with brief note, offer different problem
+THE ONLY QUESTIONS YOU ASK:
+- Multiple choice operation questions (A, B, C, D)
+- NEVER arithmetic simplification questions
+- Combine 2-3 micro-steps into one question when possible
+- Fewer total questions than Step-by-Step mode
 
 COMPLETION:
-- After showing final answer, immediately ask: "Would you like to try a similar problem?"
-- Don't ask comprehension checks - students in this mode want speed
+- After final answer, ask: "Would you like to try a similar problem?"
+- Skip comprehension checks
 """
 
     # STEP-BY-STEP MODE - Guided practice
