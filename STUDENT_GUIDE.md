@@ -2,21 +2,21 @@
 
 ## Getting Started
 
-1. **Enter your first name** (or first and last if you're a colleague)
-2. **Select your unit** from the dropdown
-3. **Choose your support level:**
-   - **Quick Hints** - A jumpstart or nudge in the right direction
-   - **Step-by-Step** - Guided practice with detailed support (recommended)
-   - **Walk Me Through** - Maximum support with explanations
-4. Click **Start Session**
+1. **Enter your first name** in the sidebar
+2. **Select which unit you're working on** from the dropdown
+3. **Choose how much help you need:**
+   - **Just a Hint** - A quick nudge in the right direction
+   - **Walk Me Through** - Guided practice step-by-step (recommended)
+   - **Explain It All** - Maximum support with detailed explanations
+4. **Type or upload your problem** and click Send
 
 ---
 
 ## How the Tutor Works
 
 ### Answering Questions
-- Every question has **4 multiple choice options** (A, B, C, D)
-- **Option D is always "I'm not sure"** - pick this if you need a hint
+- Every question has **4 multiple choice options** (A, B, C, and "I'm not sure")
+- **Pick "I'm not sure"** if you need a hint - it's there to help!
 - The tutor will guide you through problems step-by-step
 
 ### Getting Help
@@ -36,11 +36,11 @@
 
 | Mode | Best For | What You Get |
 |------|----------|--------------|
-| **Quick Hints** | Students who need a jumpstart | Strategic hints to guide you |
-| **Step-by-Step** | Students who want guided assistance | Guided practice with explanations |
-| **Walk Me Through** | Students who need extra help or are new to the topic | Detailed explanations for every step |
+| **Just a Hint** | Students who need a jumpstart | Quick strategic hints |
+| **Walk Me Through** | Students who want guided assistance | Step-by-step guidance with explanations |
+| **Explain It All** | Students who need extra help or are new to the topic | Detailed explanations for every step |
 
-**Tip:** Start with Step-by-Step. You can always switch modes!
+**Tip:** Start with Walk Me Through. You can always switch modes!
 
 ---
 
@@ -52,19 +52,21 @@
 
 **Schedule Tutoring** - Click "Schedule with Math Center" to book live help
 
-**Photo Upload** - Take a picture of a problem you're working on
+**Upload** - Click "Upload" to add a photo of your problem
+
+**Math Symbols** - Use the symbol buttons for easy typing (x², √, ÷, etc.)
 
 ---
 
 ## Tips for Success
 
-✓ **Read the question carefully** - Pick the best answer from A, B, C, or D
+✓ **Read the question carefully** - Pick the best answer from A, B, C, or "I'm not sure"
 
 ✓ **Use "I'm not sure" when stuck** - It's there to help you, not hurt you
 
 ✓ **Try before asking for hints** - You learn more by attempting first
 
-✓ **Review the summary** - In Quick Hints mode, check the steps at the end
+✓ **Review the summary** - In "Just a Hint" mode, check the steps at the end
 
 ✓ **Ask "why" when confused** - Type "show me why" to understand the reasoning
 
