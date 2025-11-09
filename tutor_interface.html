@@ -238,6 +238,10 @@
       .chat {
         height: 500px;
       }
+
+      .panel.initial-state .chat {
+        height: 200px; /* Smaller on tablet in initial state */
+      }
     }
 
     @media (max-width: 768px) {
@@ -277,6 +281,10 @@
         height: 520px;
       }
 
+      .panel.initial-state .chat {
+        height: 220px; /* Smaller on mobile in initial state */
+      }
+
       .compose {
         grid-template-columns: 1fr;
       }
@@ -296,19 +304,73 @@
       border-radius: var(--radius);
       padding: 12px;
       box-shadow: 0 2px 8px var(--shadow);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Initial state: input at top */
+    .panel.initial-state {
+      flex-direction: column-reverse;
+    }
+
+    .panel.initial-state .chat {
+      order: 2;
+      height: 300px; /* Smaller initially so input is visible */
+    }
+
+    .panel.initial-state .input-area {
+      order: 1;
+      margin-bottom: 12px;
+    }
+
+    /* After first message: normal order */
+    .panel:not(.initial-state) .chat {
+      order: 1;
+      height: 580px;
+    }
+
+    .panel:not(.initial-state) .input-area {
+      order: 2;
+    }
+
+    .input-area {
+      display: flex;
+      flex-direction: column;
     }
 
     /* ═══════════════════════════════════════════════════════════════
-       CHAT AREA - Message display
+       CHAT AREA - Message display (Notebook Paper Style)
        ═══════════════════════════════════════════════════════════════ */
     .chat {
       height: 580px;
       overflow-y: auto;
       scroll-behavior: smooth;
       padding-right: 4px; /* Space for scrollbar */
-      background: var(--bg-chat);
+      background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        transparent calc(100% - 1px),
+        #94a3b8 calc(100% - 1px),
+        #94a3b8 100%
+      );
+      background-size: 100% 28px; /* Line spacing */
+      background-color: #fefcf8; /* Cream paper color */
       border-radius: 12px;
       padding: 12px;
+      padding-left: 52px; /* Space for red margin line */
+      position: relative;
+    }
+
+    /* Red margin line (like notebook paper) */
+    .chat::before {
+      content: "";
+      position: absolute;
+      left: 40px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #ef4444;
+      opacity: 0.3;
     }
 
     /* Scrollbar styling (webkit browsers) */
@@ -892,12 +954,17 @@
          ═══════════════════════════════════════════════════════════ -->
     <div class="main">
       <!-- LEFT: Chat panel -->
-      <section class="panel">
+      <section class="panel initial-state" id="chatPanel">
         <!-- Message history -->
         <div id="chat" class="chat" role="log" aria-live="polite" aria-label="Chat messages"></div>
 
+        <!-- Input Area (starts at top, moves down after first message) -->
+        <div class="input-area">
         <!-- Math Symbols Toolbar -->
         <div class="math-toolbar">
+          <button class="math-symbol" data-symbol="(" title="Left parenthesis">(</button>
+          <button class="math-symbol" data-symbol=")" title="Right parenthesis">)</button>
+          <button class="math-symbol" data-symbol="/" title="Fraction bar">/</button>
           <button class="math-symbol" data-symbol="²" title="Squared">x²</button>
           <button class="math-symbol" data-symbol="³" title="Cubed">x³</button>
           <button class="math-symbol" data-symbol="√" title="Square root">√</button>
@@ -906,10 +973,9 @@
           <button class="math-symbol" data-symbol="≤" title="Less than or equal">≤</button>
           <button class="math-symbol" data-symbol="≥" title="Greater than or equal">≥</button>
           <button class="math-symbol" data-symbol="≠" title="Not equal">≠</button>
-          <button class="math-symbol" data-symbol="π" title="Pi">π</button>
-          <button class="math-symbol" data-symbol="∞" title="Infinity">∞</button>
+          <button class="math-symbol" data-symbol="log" title="Logarithm">log</button>
+          <button class="math-symbol" data-symbol="ln" title="Natural log">ln</button>
           <button class="math-symbol" data-symbol="±" title="Plus-minus">±</button>
-          <button class="math-symbol" data-symbol="°" title="Degree">°</button>
         </div>
 
         <!-- Quick answer buttons (A/B/C/D + helpers) -->
@@ -950,6 +1016,7 @@
         <div id="preview" class="preview">
           <img id="previewImg" alt="Uploaded problem image" />
         </div>
+        </div><!-- End input-area -->
       </section>
 
       <!-- RIGHT: Settings sidebar -->
@@ -989,7 +1056,7 @@
           <input id="studentName" type="text" placeholder="First name..." aria-label="Enter your first name" autocomplete="given-name" required />
 
           <!-- Topic selection (required) -->
-          <label for="module" class="label mt-10">What are you working on?</label>
+          <label for="module" class="label mt-10">Which unit are you working on?</label>
           <select id="module" aria-required="true">
             <option value="">— Choose a unit —</option>
             <option value="unit1">Unit 1: Linear Equations & Inequalities</option>
@@ -1660,6 +1727,12 @@ async function send(message) {
 
     // Mark step 3 complete after first message
     $("step3").classList.add("complete");
+
+    // Move input area to bottom after first message
+    const chatPanel = $("chatPanel");
+    if (chatPanel.classList.contains("initial-state")) {
+      chatPanel.classList.remove("initial-state");
+    }
 
   } catch (error) {
     addMsg("Can't reach the server right now. Try again in a moment.", "assistant");
