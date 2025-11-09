@@ -546,16 +546,17 @@
 
     /* Photo button in compose area */
     .btn-photo {
-      background: var(--blue-light);
-      color: var(--blue-dark);
-      padding: 10px 14px;
+      background: #d4a574;  /* Light tan background */
+      color: #1f2937;  /* Dark text for contrast */
+      padding: 12px 18px;  /* Match send button height */
       font-size: 20px;
-      border: 2px solid var(--blue-medium);
+      border: 2px solid #b8935f;  /* Darker tan border */
       cursor: pointer;
+      font-weight: 800;  /* Match send button weight */
     }
 
     .btn-photo:hover {
-      background: var(--blue-medium);
+      background: #b8935f;  /* Darker tan on hover */
       color: white;
     }
 
@@ -978,12 +979,12 @@
           <button class="math-symbol" data-symbol="±" title="Plus-minus">±</button>
         </div>
 
-        <!-- Quick answer buttons (A/B/C/D + helpers) -->
+        <!-- Quick answer buttons (A/B/C + I'm not sure + helpers) -->
         <div class="choices" role="toolbar" aria-label="Quick response options">
           <button class="chip" data-choice="A" disabled aria-label="Answer A" aria-describedby="buttonHelp">A</button>
           <button class="chip" data-choice="B" disabled aria-label="Answer B" aria-describedby="buttonHelp">B</button>
           <button class="chip" data-choice="C" disabled aria-label="Answer C" aria-describedby="buttonHelp">C</button>
-          <button class="chip" data-choice="D" disabled aria-label="I'm not sure" aria-describedby="buttonHelp">D (I'm not sure)</button>
+          <button class="chip" data-choice="D" disabled aria-label="I'm not sure" aria-describedby="buttonHelp">I'm not sure</button>
           <button class="chip" id="whyBtn" disabled aria-label="Ask why this step makes sense" aria-describedby="buttonHelp">Show me why</button>
           <button class="chip" id="hintBtn" disabled aria-label="Get a hint" aria-describedby="buttonHelp">Hint</button>
           <button class="chip" id="calcBtn" aria-label="Open calculator"><span aria-hidden="true">🔢</span> Calculator</button>
