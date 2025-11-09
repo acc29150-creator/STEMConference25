@@ -5,7 +5,7 @@
 1. **Enter your first name** (or first and last if you're a colleague)
 2. **Select your unit** from the dropdown
 3. **Choose your support level:**
-   - **Quick Hints** - Fewer questions, larger steps
+   - **Quick Hints** - A jumpstart or nudge in the right direction
    - **Step-by-Step** - Guided practice with detailed support (recommended)
    - **Walk Me Through** - Maximum support with explanations
 4. Click **Start Session**
@@ -36,9 +36,9 @@
 
 | Mode | Best For | What You Get |
 |------|----------|--------------|
-| **Quick Hints** | Students who want practice | Fewer questions, clean results, step summary at end |
-| **Step-by-Step** | Most students | Guided practice with explanations |
-| **Walk Me Through** | Need extra help or new to the topic | Detailed explanations for every step |
+| **Quick Hints** | Students who need a jumpstart | Strategic hints to guide you |
+| **Step-by-Step** | Students who want guided assistance | Guided practice with explanations |
+| **Walk Me Through** | Students who need extra help or are new to the topic | Detailed explanations for every step |
 
 **Tip:** Start with Step-by-Step. You can always switch modes!
 
