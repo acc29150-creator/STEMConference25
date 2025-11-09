@@ -236,7 +236,7 @@
       }
 
       .chat {
-        height: 500px;
+        height: 350px;
       }
     }
 
@@ -274,7 +274,7 @@
       }
 
       .chat {
-        height: 520px;
+        height: 400px;
       }
 
       .compose {
@@ -302,7 +302,7 @@
        CHAT AREA - Message display
        ═══════════════════════════════════════════════════════════════ */
     .chat {
-      height: 580px;
+      height: 380px;
       overflow-y: auto;
       scroll-behavior: smooth;
       padding-right: 4px;
@@ -482,20 +482,22 @@
       box-shadow: 0 0 0 3px rgba(37,99,235,.1);
     }
 
-    /* Photo/Upload - paperclip icon, no button */
+    /* Photo/Upload - simple text link */
     .btn-photo {
       background: transparent;
-      color: #6b7280;
+      color: var(--blue-medium);
       padding: 12px 14px;
-      font-size: 24px;
+      font-size: 15px;
+      font-weight: 600;
       border: none;
       cursor: pointer;
       transition: all 0.2s;
+      text-decoration: underline;
     }
 
     .btn-photo:hover {
-      color: var(--blue-medium);
-      transform: scale(1.1);
+      color: var(--blue-dark);
+      text-decoration: none;
     }
 
     /* Hidden file input */
@@ -939,7 +941,7 @@
             autocomplete="off"
           />
           <button id="photoBtn" class="btn btn-photo" aria-label="Attach photo" title="Add photo">
-            📎
+            Upload
           </button>
           <button id="sendBtn" class="btn btn-send" aria-label="Send message">
             Send
@@ -1482,8 +1484,8 @@ function updateButtonStates() {
 moduleSel.addEventListener("change", () => {
   updateButtonStates();
 
-  // Auto-collapse sidebar after unit is selected (if not already collapsed)
-  if (moduleSel.value && !mainContainer.classList.contains("sidebar-collapsed")) {
+  // Auto-collapse sidebar ONLY after BOTH name AND unit are entered
+  if (userName && moduleSel.value && !mainContainer.classList.contains("sidebar-collapsed")) {
     setTimeout(() => {
       toggleSidebar();
     }, 800); // Small delay so student sees selection
@@ -1494,13 +1496,7 @@ moduleSel.addEventListener("change", () => {
 // SIDEBAR COLLAPSE/EXPAND - Maximize workspace area
 // ───────────────────────────────────────────────────────────────────────────
 
-// Check saved sidebar state
-const sidebarCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
-if (sidebarCollapsed) {
-  mainContainer.classList.add("sidebar-collapsed");
-  sidebarToggle.textContent = "▶";
-  sidebarToggle.title = "Expand sidebar";
-}
+// Sidebar starts OPEN by default (no check for saved state on initial load)
 
 // Toggle sidebar function
 function toggleSidebar() {
