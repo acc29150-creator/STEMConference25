@@ -24,14 +24,18 @@
       --green: #10b981;        /* Success green */
       --green-dark: #059669;   /* Darker green for hover */
       --red: #ef4444;          /* Error red */
+      --yellow: #fbbf24;       /* Hint/tip yellow */
+      --purple: #a855f7;       /* Encouragement purple */
 
       /* Neutral colors */
       --text-dark: #111827;    /* Main text */
       --text-medium: #6b7280;  /* Muted text */
-      --bg-white: #ffffff;     /* White backgrounds */
-      --bg-gray: #f9fafb;      /* Light gray backgrounds */
+      --bg-white: #fffefb;     /* Warm white (cream tint) */
+      --bg-gray: #f8f9fa;      /* Warm light gray */
+      --bg-chat: #fafaf9;      /* Chat background (warm) */
       --border: #e5e7eb;       /* Border color */
       --shadow: rgba(0,0,0,.08); /* Soft shadows */
+      --shadow-strong: rgba(0,0,0,.15); /* Stronger shadows */
 
       /* UI settings */
       --radius: 14px;          /* Border radius */
@@ -232,7 +236,7 @@
       }
 
       .chat {
-        height: 400px;
+        height: 500px;
       }
     }
 
@@ -270,7 +274,7 @@
       }
 
       .chat {
-        height: 450px;
+        height: 520px;
       }
 
       .compose {
@@ -287,20 +291,24 @@
     }
 
     .panel {
-      background: var(--bg-gray);
+      background: var(--bg-white);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 12px;
+      box-shadow: 0 2px 8px var(--shadow);
     }
 
     /* ═══════════════════════════════════════════════════════════════
        CHAT AREA - Message display
        ═══════════════════════════════════════════════════════════════ */
     .chat {
-      height: 420px;
+      height: 580px;
       overflow-y: auto;
       scroll-behavior: smooth;
       padding-right: 4px; /* Space for scrollbar */
+      background: var(--bg-chat);
+      border-radius: 12px;
+      padding: 12px;
     }
 
     /* Scrollbar styling (webkit browsers) */
@@ -374,11 +382,11 @@
     /* Message bubble */
     .bubble {
       max-width: 75%;
-      padding: 8px 10px;
-      border-radius: 12px;
+      padding: 10px 14px;
+      border-radius: 16px;
       white-space: pre-wrap;
-      line-height: 1.45;
-      box-shadow: 0 1px 3px var(--shadow);
+      line-height: 1.5;
+      box-shadow: 0 2px 6px var(--shadow);
       word-wrap: break-word;
       font-size: 15px;
     }
@@ -702,6 +710,134 @@
     }
 
     /* ═══════════════════════════════════════════════════════════════
+       PROGRESS TRACKER
+       ═══════════════════════════════════════════════════════════════ */
+    .progress-bar {
+      background: var(--bg-gray);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-medium);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .progress-emoji {
+      font-size: 16px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       CELEBRATION ANIMATION
+       ═══════════════════════════════════════════════════════════════ */
+    @keyframes celebrate {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .celebrate {
+      animation: celebrate 0.5s ease-in-out;
+    }
+
+    @keyframes confetti {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+    }
+
+    .confetti {
+      position: absolute;
+      font-size: 24px;
+      animation: confetti 1.5s ease-out forwards;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       MATH SYMBOLS TOOLBAR
+       ═══════════════════════════════════════════════════════════════ */
+    .math-toolbar {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+      padding: 8px;
+      background: var(--bg-gray);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .math-symbol {
+      background: white;
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.2s;
+      min-width: 36px;
+      text-align: center;
+    }
+
+    .math-symbol:hover {
+      background: var(--blue-light);
+      border-color: var(--blue-medium);
+      transform: translateY(-1px);
+    }
+
+    .math-symbol:active {
+      transform: translateY(0);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       NUMBERED STEPS - Visual guide
+       ═══════════════════════════════════════════════════════════════ */
+    .step-guide {
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+      border: 2px solid var(--blue-light);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .step-guide strong {
+      color: var(--blue-dark);
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin: 6px 0;
+    }
+
+    .step-number {
+      background: var(--blue-medium);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .step-number.complete {
+      background: var(--green);
+    }
+
+    .step-text {
+      flex: 1;
+      padding-top: 2px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
        UTILITY CLASSES
        ═══════════════════════════════════════════════════════════════ */
     .mt-10 { margin-top: 8px; }
@@ -760,6 +896,22 @@
         <!-- Message history -->
         <div id="chat" class="chat" role="log" aria-live="polite" aria-label="Chat messages"></div>
 
+        <!-- Math Symbols Toolbar -->
+        <div class="math-toolbar">
+          <button class="math-symbol" data-symbol="²" title="Squared">x²</button>
+          <button class="math-symbol" data-symbol="³" title="Cubed">x³</button>
+          <button class="math-symbol" data-symbol="√" title="Square root">√</button>
+          <button class="math-symbol" data-symbol="÷" title="Divide">÷</button>
+          <button class="math-symbol" data-symbol="×" title="Multiply">×</button>
+          <button class="math-symbol" data-symbol="≤" title="Less than or equal">≤</button>
+          <button class="math-symbol" data-symbol="≥" title="Greater than or equal">≥</button>
+          <button class="math-symbol" data-symbol="≠" title="Not equal">≠</button>
+          <button class="math-symbol" data-symbol="π" title="Pi">π</button>
+          <button class="math-symbol" data-symbol="∞" title="Infinity">∞</button>
+          <button class="math-symbol" data-symbol="±" title="Plus-minus">±</button>
+          <button class="math-symbol" data-symbol="°" title="Degree">°</button>
+        </div>
+
         <!-- Quick answer buttons (A/B/C/D + helpers) -->
         <div class="choices" role="toolbar" aria-label="Quick response options">
           <button class="chip" data-choice="A" disabled aria-label="Answer A" aria-describedby="buttonHelp">A</button>
@@ -809,12 +961,35 @@
 
         <!-- Sidebar content (hidden when collapsed) -->
         <div class="sidebar-content">
+          <!-- Quick Start Guide -->
+          <div class="step-guide">
+            <strong>Quick Start:</strong>
+            <div class="step">
+              <div class="step-number" id="step1">1</div>
+              <div class="step-text">Enter your name</div>
+            </div>
+            <div class="step">
+              <div class="step-number" id="step2">2</div>
+              <div class="step-text">Choose what you're working on</div>
+            </div>
+            <div class="step">
+              <div class="step-number" id="step3">3</div>
+              <div class="step-text">Type your problem & hit Send!</div>
+            </div>
+          </div>
+
+          <!-- Progress Tracker -->
+          <div class="progress-bar" id="progressBar" style="display:none;">
+            <span class="progress-emoji">🎯</span>
+            <span id="progressText">Problems solved today: 0</span>
+          </div>
+
           <!-- Student name input (REQUIRED) -->
-          <label for="studentName" class="label">Your First Name (required)</label>
-          <input id="studentName" type="text" placeholder="Enter your first name..." aria-label="Enter your first name" autocomplete="given-name" required />
+          <label for="studentName" class="label">👋 What's your name?</label>
+          <input id="studentName" type="text" placeholder="First name..." aria-label="Enter your first name" autocomplete="given-name" required />
 
           <!-- Topic selection (required) -->
-          <label for="module" class="label mt-10">Unit (choose first)</label>
+          <label for="module" class="label mt-10">📚 What are you working on?</label>
           <select id="module" aria-required="true">
             <option value="">— Choose a unit —</option>
             <option value="unit1">Unit 1: Linear Equations & Inequalities</option>
@@ -826,15 +1001,15 @@
           <!-- Mode and Language selectors (side by side) -->
           <div class="row mt-10">
             <div>
-              <label for="mode" class="label">Support Level</label>
+              <label for="mode" class="label">🎯 How much help?</label>
               <select id="mode">
-                <option value="quick_hints">Need a Hint?</option>
-                <option value="step_by_step" selected>Walk Me Through It</option>
-                <option value="detailed_explanations">Teach Me More</option>
+                <option value="quick_hints">Just a Hint</option>
+                <option value="step_by_step" selected>Walk Me Through</option>
+                <option value="detailed_explanations">Explain It All</option>
               </select>
             </div>
             <div>
-              <label for="lang" class="label">Language</label>
+              <label for="lang" class="label">🌍 Language</label>
               <select id="lang">
                 <option value="English" selected>English (Recommended)</option>
                 <option value="Spanish">Spanish (Auto-translated)</option>
@@ -1133,10 +1308,156 @@ studentNameInput.addEventListener("input", () => {
   if (userName) {
     localStorage.setItem("userName", userName);
     showWelcome();  // Refresh greeting with name
+    updateStepCompletion();  // Update step 1
   }
 });
 
 showWelcome();  // Show welcome on page load
+
+// ───────────────────────────────────────────────────────────────────────────
+// STEP COMPLETION TRACKING
+// ───────────────────────────────────────────────────────────────────────────
+
+function updateStepCompletion() {
+  const step1 = $("step1");
+  const step2 = $("step2");
+  const step3 = $("step3");
+
+  // Step 1: Name entered
+  if (userName) {
+    step1.classList.add("complete");
+  } else {
+    step1.classList.remove("complete");
+  }
+
+  // Step 2: Unit selected
+  if (moduleSel.value) {
+    step2.classList.add("complete");
+  } else {
+    step2.classList.remove("complete");
+  }
+
+  // Step 3: Message sent (tracked separately)
+}
+
+// Update steps when unit changes
+moduleSel.addEventListener("change", updateStepCompletion);
+
+// Call on load to set initial state
+updateStepCompletion();
+
+// ───────────────────────────────────────────────────────────────────────────
+// PROGRESS TRACKING - Problems solved today
+// ───────────────────────────────────────────────────────────────────────────
+
+function getProblemsToday() {
+  const today = new Date().toDateString();
+  const stored = localStorage.getItem("problemsData");
+  if (!stored) return 0;
+
+  const data = JSON.parse(stored);
+  if (data.date === today) {
+    return data.count;
+  }
+  return 0;
+}
+
+function incrementProblemsToday() {
+  const today = new Date().toDateString();
+  const count = getProblemsToday() + 1;
+
+  localStorage.setItem("problemsData", JSON.stringify({
+    date: today,
+    count: count
+  }));
+
+  updateProgressDisplay(count);
+  return count;
+}
+
+function updateProgressDisplay(count) {
+  const progressBar = $("progressBar");
+  const progressText = $("progressText");
+
+  if (count > 0) {
+    progressBar.style.display = "flex";
+    const emoji = count >= 5 ? "🔥" : count >= 3 ? "⭐" : "🎯";
+    $("progressBar").querySelector(".progress-emoji").textContent = emoji;
+    progressText.textContent = `Problems solved today: ${count}`;
+  }
+}
+
+// Show progress on load
+const problemCount = getProblemsToday();
+if (problemCount > 0) {
+  updateProgressDisplay(problemCount);
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// CELEBRATION ANIMATION - When problem is solved
+// ───────────────────────────────────────────────────────────────────────────
+
+function celebrate() {
+  // Add celebration class to last message
+  const messages = chat.querySelectorAll(".msg");
+  if (messages.length > 0) {
+    const lastMsg = messages[messages.length - 1];
+    lastMsg.querySelector(".bubble")?.classList.add("celebrate");
+  }
+
+  // Create confetti
+  const confettiSymbols = ["🎉", "✨", "🌟", "⭐", "💫"];
+  for (let i = 0; i < 8; i++) {
+    setTimeout(() => {
+      const confetti = document.createElement("div");
+      confetti.className = "confetti";
+      confetti.textContent = confettiSymbols[Math.floor(Math.random() * confettiSymbols.length)];
+      confetti.style.left = `${Math.random() * 100}%`;
+      confetti.style.top = `${chat.offsetTop + Math.random() * 100}px`;
+      document.body.appendChild(confetti);
+
+      setTimeout(() => confetti.remove(), 1500);
+    }, i * 100);
+  }
+
+  // Increment progress
+  incrementProblemsToday();
+}
+
+// Detect when problem is solved (AI says "solved it" or similar)
+function checkForCompletion(aiResponse) {
+  const completionPhrases = [
+    "solved it",
+    "you solved",
+    "excellent work",
+    "great work",
+    "nice work",
+    "well done"
+  ];
+
+  const lowerResponse = aiResponse.toLowerCase();
+  return completionPhrases.some(phrase => lowerResponse.includes(phrase));
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// MATH SYMBOLS - Quick insert buttons
+// ───────────────────────────────────────────────────────────────────────────
+
+document.querySelectorAll(".math-symbol").forEach(button => {
+  button.onclick = () => {
+    const symbol = button.dataset.symbol;
+    const cursorPos = msg.selectionStart;
+    const textBefore = msg.value.substring(0, cursorPos);
+    const textAfter = msg.value.substring(cursorPos);
+
+    // Insert symbol at cursor position
+    msg.value = textBefore + symbol + textAfter;
+
+    // Move cursor after inserted symbol
+    msg.selectionStart = msg.selectionEnd = cursorPos + symbol.length;
+    msg.focus();
+  };
+});
 
 // ───────────────────────────────────────────────────────────────────────────
 // BUTTON STATE MANAGEMENT - Enable/disable based on topic selection
@@ -1331,6 +1652,14 @@ async function send(message) {
 
     // Show AI response
     addMsg(data.response, "assistant");
+
+    // Check if problem was completed and celebrate!
+    if (checkForCompletion(data.response)) {
+      setTimeout(celebrate, 500);  // Small delay so message appears first
+    }
+
+    // Mark step 3 complete after first message
+    $("step3").classList.add("complete");
 
   } catch (error) {
     addMsg("Can't reach the server right now. Try again in a moment.", "assistant");
