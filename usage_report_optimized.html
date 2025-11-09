@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usage Report - MATH 1710 Tutor (Optimized)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #1e40af 0%, #1e293b 100%);
+      color: #111827;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+
+    h1 {
+      color: #1e40af;
+      margin-bottom: 8px;
+      font-size: 32px;
+    }
+
+    .subtitle {
+      color: #6b7280;
+      margin-bottom: 24px;
+      font-size: 16px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .refresh-btn, .export-btn {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+
+    .refresh-btn:hover {
+      background: #059669;
+    }
+
+    .refresh-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .export-btn {
+      background: #3b82f6;
+    }
+
+    .export-btn:hover {
+      background: #2563eb;
+    }
+
+    .auto-refresh-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #374151;
+      font-size: 14px;
+    }
+
+    .auto-refresh-toggle input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 250px;
+      padding: 10px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    .section {
+      margin-bottom: 32px;
+    }
+
+    .section h2 {
+      color: #1e40af;
+      font-size: 20px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: #1e40af;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    th {
+      background: #f3f4f6;
+      padding: 12px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 13px;
+      color: #374151;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+
+    tr:hover {
+      background: #f9fafb;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px;
+      color: #6b7280;
+      font-style: italic;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 48px;
+      color: #6b7280;
+    }
+
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid #fecaca;
+    }
+
+    .accordion-item {
+      margin-bottom: 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .accordion-header {
+      background: #f9fafb;
+      padding: 16px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+    }
+
+    .accordion-header:hover {
+      background: #f3f4f6;
+    }
+
+    .accordion-header.active {
+      background: #e0e7ff;
+    }
+
+    .accordion-title {
+      font-weight: 700;
+      color: #374151;
+      font-size: 15px;
+    }
+
+    .accordion-count {
+      background: #1e40af;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .accordion-content.active {
+      max-height: 3000px;
+    }
+
+    .accordion-content table {
+      margin: 0;
+    }
+
+    .last-updated {
+      color: #6b7280;
+      font-size: 13px;
+      margin-left: auto;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ========== Phase 1 & 2 Enhancements ========== */
+
+    .alert-section {
+      background: #fef2f2;
+      border: 2px solid #fca5a5;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 32px;
+    }
+
+    .alert-section h2 {
+      color: #991b1b;
+      border-bottom: 2px solid #fca5a5;
+    }
+
+    .alert-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .alert-card {
+      background: white;
+      border: 1px solid #fca5a5;
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .alert-card .student-name {
+      font-weight: 700;
+      font-size: 16px;
+      color: #991b1b;
+    }
+
+    .alert-card .alert-reason {
+      font-size: 14px;
+      color: #dc2626;
+    }
+
+    .alert-card .alert-date {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    .status-green { background: #10b981; }
+    .status-yellow { background: #fbbf24; }
+    .status-orange { background: #f97316; }
+    .status-red { background: #ef4444; }
+
+    .status-text {
+      font-size: 13px;
+      color: #6b7280;
+      margin-left: 4px;
+    }
+
+    .recommendations-section {
+      background: #eff6ff;
+      border: 2px solid #93c5fd;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 32px;
+    }
+
+    .recommendations-section h2 {
+      color: #1e40af;
+      border-bottom: 2px solid #93c5fd;
+    }
+
+    .recommendation-item {
+      background: white;
+      border-left: 4px solid #3b82f6;
+      padding: 12px 16px;
+      margin: 12px 0;
+      border-radius: 4px;
+    }
+
+    .recommendation-item strong {
+      color: #1e40af;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .insight-badge {
+      display: inline-block;
+      background: #10b981;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-left: 8px;
+    }
+
+    .insight-badge.warning {
+      background: #f97316;
+    }
+
+    .insight-badge.info {
+      background: #3b82f6;
+    }
+
+    .difficulty-rank {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .difficulty-bar {
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+      width: 100px;
+      margin: 0 8px;
+    }
+
+    .difficulty-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .difficulty-fill.high { background: #ef4444; }
+    .difficulty-fill.medium { background: #f97316; }
+    .difficulty-fill.low { background: #10b981; }
+
+    .metric-comparison {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .metric-item {
+      text-align: center;
+      padding: 12px;
+      background: #f9fafb;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .metric-item .metric-label {
+      font-size: 12px;
+      color: #6b7280;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .metric-item .metric-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1e40af;
+    }
+
+    .trend-indicator {
+      display: inline-block;
+      margin-left: 8px;
+      font-size: 18px;
+    }
+
+    .trend-up { color: #10b981; }
+    .trend-down { color: #ef4444; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 Usage Report</h1>
+    <p class="subtitle">MATH 1710 Precalculus Learning Assistant (Optimized)</p>
+
+    <div class="toolbar">
+      <button class="refresh-btn" id="refreshBtn" onclick="app.refresh()">
+        <span id="refreshText">🔄 Refresh Data</span>
+      </button>
+      <button class="export-btn" onclick="app.exportToCSV()">📥 Export to CSV</button>
+      <label class="auto-refresh-toggle">
+        <input type="checkbox" id="autoRefreshToggle" onchange="app.toggleAutoRefresh()">
+        Auto-refresh (30 min)
+      </label>
+      <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search students, units, sessions..." oninput="app.filterSessions()">
+      <span class="last-updated" id="lastUpdated"></span>
+    </div>
+
+    <div id="content">
+      <div class="loading">Loading data...</div>
+    </div>
+  </div>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════════════
+    // OPTIMIZED USAGE TRACKING APP
+    // ═══════════════════════════════════════════════════════════════════
+
+    const app = {
+      // State management
+      state: {
+        statsData: null,
+        fullData: null,
+        processedSessions: null,
+        accordionStates: [false, false, false, false, false, false],
+        autoRefreshInterval: null,
+        lastFetch: null,
+        isRefreshing: false,
+        searchQuery: ''
+      },
+
+      // Cache duration (5 minutes)
+      CACHE_DURATION: 5 * 60 * 1000,
+
+      // ═══════════════════════════════════════════════════════════════
+      // INITIALIZATION
+      // ═══════════════════════════════════════════════════════════════
+
+      async init() {
+        await this.loadData();
+      },
+
+      // ═══════════════════════════════════════════════════════════════
+      // DATA FETCHING (Optimized with caching)
+      // ═══════════════════════════════════════════════════════════════
+
+      async loadData(force = false) {
+        // Check cache first (unless forced refresh)
+        if (!force && this.state.lastFetch &&
+            (Date.now() - this.state.lastFetch < this.CACHE_DURATION)) {
+          console.log('Using cached data');
+          this.render();
+          return;
+        }
+
+        if (this.state.isRefreshing) {
+          console.log('Already refreshing...');
+          return;
+        }
+
+        this.state.isRefreshing = true;
+        this.updateRefreshButton(true);
+
+        try {
+          // OPTIMIZATION: Fetch both endpoints in parallel
+          const [statsResponse, fullDataResponse] = await Promise.all([
+            fetch('/stats'),
+            fetch('/tracking_data_live')
+          ]);
+
+          if (!statsResponse.ok || !fullDataResponse.ok) {
+            throw new Error('Failed to load data');
+          }
+
+          this.state.statsData = await statsResponse.json();
+          this.state.fullData = await fullDataResponse.json();
+          this.state.lastFetch = Date.now();
+
+          // OPTIMIZATION: Process sessions once and cache
+          this.state.processedSessions = this.processSessions();
+
+          this.render();
+
+        } catch (error) {
+          this.renderError(error.message);
+        } finally {
+          this.state.isRefreshing = false;
+          this.updateRefreshButton(false);
+          this.updateLastUpdatedTime();
+        }
+      },
+
+      // ═══════════════════════════════════════════════════════════════
+      // DATA PROCESSING (Single-pass optimization)
+      // ═══════════════════════════════════════════════════════════════
+
+      processSessions() {
+        const sessions = this.state.fullData?.sessions;
+        if (!sessions) return null;
+
+        const now = new Date();
+        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+        const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+
+        // OPTIMIZATION: Single pass through sessions, categorize all at once
+        const categories = {
+          past7Days: [],
+          past14Days: [],
+          past30Days: [],
+          past60Days: [],
+          archived90Plus: [],
+          colleagues: [],          // NEW: Faculty/staff with first+last name
+          studentCollaborators: [] // NEW: David Escalante, David, Kavin
+        };
+
+        // Student collaborator names to identify
+        const studentCollabNames = ['david escalante', 'david', 'kavin'];
+
+        // Helper function to identify user type
+        const identifyUserType = (session) => {
+          const userName = (session.user_name || '').toLowerCase().trim();
+
+          // Check if it's a known student collaborator
+          if (studentCollabNames.includes(userName)) {
+            return 'studentCollaborator';
+          }
+
+          // Check if name has space (first + last name) = colleague
+          // But exclude our student collaborators
+          if (userName.includes(' ')) {
+            return 'colleague';
+          }
+
+          // Regular student (first name only)
+          return 'student';
+        };
+
+        // Convert to array and sort once
+        const sortedSessions = Object.entries(sessions)
+          .sort((a, b) => new Date(b[1].started) - new Date(a[1].started));
+
+        // OPTIMIZATION: Single iteration to categorize
+        sortedSessions.forEach(([sessionId, session]) => {
+          const sessionDate = new Date(session.started);
+          const sessionObj = { id: sessionId, ...session };
+          const userType = identifyUserType(session);
+
+          // Separate colleagues (faculty/staff)
+          if (userType === 'colleague') {
+            categories.colleagues.push(sessionObj);
+          }
+          // Separate student collaborators (David Escalante, David, Kavin)
+          else if (userType === 'studentCollaborator') {
+            categories.studentCollaborators.push(sessionObj);
+          }
+          // Archive sessions older than 90 days (max 100)
+          else if (sessionDate < ninetyDaysAgo) {
+            if (categories.archived90Plus.length < 100) {
+              categories.archived90Plus.push(sessionObj);
+            }
+          }
+          // Active student sessions by time period
+          else {
+            if (sessionDate >= sevenDaysAgo) {
+              categories.past7Days.push(sessionObj);
+            }
+            if (sessionDate >= fourteenDaysAgo) {
+              categories.past14Days.push(sessionObj);
+            }
+            if (sessionDate >= thirtyDaysAgo) {
+              categories.past30Days.push(sessionObj);
+            }
+            if (sessionDate >= sixtyDaysAgo) {
+              categories.past60Days.push(sessionObj);
+            }
+          }
+        });
+
+        return categories;
+      },
+
+      // ═══════════════════════════════════════════════════════════════
+      // ANALYTICS CALCULATIONS (Phase 1 & 2)
+      // ═══════════════════════════════════════════════════════════════
+
+      getStudentsNeedingAttention() {
+        // Only include actual students (exclude colleagues and student collaborators)
+        const allActiveSessions = [
+          ...this.state.processedSessions.past7Days,
+          ...this.state.processedSessions.past14Days,
+          ...this.state.processedSessions.past30Days,
+          ...this.state.processedSessions.past60Days
+        ];
+
+        // Remove duplicates
+        const uniqueSessions = Array.from(
+          new Map(allActiveSessions.map(s => [s.id, s])).values()
+        );
+
+        const flagged = uniqueSessions.filter(session => {
+          const wrong = session.wrong_responses || session.incorrect_count || 0;
+          const duration = session.duration_seconds || 0;
+          const durationMin = Math.round(duration / 60);
+
+          return wrong >= 5 || durationMin >= 30;
+        });
+
+        // Sort by severity (wrong responses desc, then duration desc)
+        return flagged.sort((a, b) => {
+          const aWrong = a.wrong_responses || a.incorrect_count || 0;
+          const bWrong = b.wrong_responses || b.incorrect_count || 0;
+          if (bWrong !== aWrong) return bWrong - aWrong;
+          return (b.duration_seconds || 0) - (a.duration_seconds || 0);
+        }).slice(0, 10); // Top 10 most urgent
+      },
+
+      getMostChallengingUnits() {
+        const allActiveSessions = [
+          ...this.state.processedSessions.past30Days // Last 30 days for relevance
+        ];
+
+        const byUnit = {};
+
+        allActiveSessions.forEach(session => {
+          const unit = session.module || 'Unknown';
+          if (!byUnit[unit]) {
+            byUnit[unit] = {
+              unit,
+              totalWrong: 0,
+              totalHints: 0,
+              totalDuration: 0,
+              sessionCount: 0
+            };
+          }
+
+          byUnit[unit].totalWrong += session.wrong_responses || session.incorrect_count || 0;
+          byUnit[unit].totalHints += session.hints_requested || session.hint_count || 0;
+          byUnit[unit].totalDuration += session.duration_seconds || 0;
+          byUnit[unit].sessionCount++;
+        });
+
+        // Calculate averages and sort by difficulty
+        return Object.values(byUnit)
+          .map(u => ({
+            unit: u.unit,
+            avgWrong: u.totalWrong / u.sessionCount,
+            avgHints: u.totalHints / u.sessionCount,
+            avgDuration: Math.round(u.totalDuration / u.sessionCount / 60),
+            sessionCount: u.sessionCount,
+            difficultyScore: (u.totalWrong / u.sessionCount) * 2 + (u.totalHints / u.sessionCount)
+          }))
+          .sort((a, b) => b.difficultyScore - a.difficultyScore);
+      },
+
+      getModeEffectiveness() {
+        const allActiveSessions = [
+          ...this.state.processedSessions.past30Days
+        ];
+
+        const byMode = {};
+
+        allActiveSessions.forEach(session => {
+          const mode = session.mode || 'Standard';
+          if (!byMode[mode]) {
+            byMode[mode] = {
+              mode,
+              totalWrong: 0,
+              totalHints: 0,
+              totalDuration: 0,
+              sessionCount: 0,
+              completed: 0
+            };
+          }
+
+          byMode[mode].totalWrong += session.wrong_responses || session.incorrect_count || 0;
+          byMode[mode].totalHints += session.hints_requested || session.hint_count || 0;
+          byMode[mode].totalDuration += session.duration_seconds || 0;
+          byMode[mode].sessionCount++;
+
+          if (session.completed || session.final_answer_correct) {
+            byMode[mode].completed++;
+          }
+        });
+
+        return Object.values(byMode).map(m => ({
+          mode: m.mode,
+          avgWrong: (m.totalWrong / m.sessionCount).toFixed(1),
+          avgHints: (m.totalHints / m.sessionCount).toFixed(1),
+          avgDuration: Math.round(m.totalDuration / m.sessionCount / 60),
+          sessionCount: m.sessionCount,
+          successRate: m.completed > 0 ? Math.round((m.completed / m.sessionCount) * 100) : 0
+        }));
+      },
+
+      getPeakUsageTimes() {
+        const allActiveSessions = [
+          ...this.state.processedSessions.past7Days
+        ];
+
+        const hourCounts = {};
+        for (let i = 0; i < 24; i++) {
+          hourCounts[i] = 0;
+        }
+
+        allActiveSessions.forEach(session => {
+          const hour = new Date(session.started).getHours();
+          hourCounts[hour]++;
+        });
+
+        // Find top 4 peak hours
+        return Object.entries(hourCounts)
+          .map(([hour, count]) => ({
+            hour: parseInt(hour),
+            count,
+            timeRange: this.formatTimeRange(parseInt(hour))
+          }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 4);
+      },
+
+      formatTimeRange(hour) {
+        const start = hour === 0 ? '12am' : hour < 12 ? `${hour}am` : hour === 12 ? '12pm' : `${hour-12}pm`;
+        const end = hour === 23 ? '12am' : hour < 11 ? `${hour+1}am` : hour === 11 ? '12pm' : `${hour-11}pm`;
+        return `${start}-${end}`;
+      },
+
+      getEngagementMetrics() {
+        const allActiveSessions = [
+          ...this.state.processedSessions.past30Days
+        ];
+
+        const userSessionCounts = {};
+        allActiveSessions.forEach(session => {
+          const token = session.user_token;
+          userSessionCounts[token] = (userSessionCounts[token] || 0) + 1;
+        });
+
+        const totalUsers = Object.keys(userSessionCounts).length;
+        const totalSessions = allActiveSessions.length;
+        const repeatUsers = Object.values(userSessionCounts).filter(count => count > 1).length;
+        const oneTimeUsers = totalUsers - repeatUsers;
+        const avgSessionsPerUser = totalUsers > 0 ? (totalSessions / totalUsers).toFixed(1) : 0;
+        const returnRate = totalUsers > 0 ? Math.round((repeatUsers / totalUsers) * 100) : 0;
+
+        return {
+          totalUsers,
+          repeatUsers,
+          oneTimeUsers,
+          returnRate,
+          avgSessionsPerUser
+        };
+      },
+
+      // ═══════════════════════════════════════════════════════════════
+      // RENDERING
+      // ═══════════════════════════════════════════════════════════════
+
+      render() {
+        const content = document.getElementById('content');
+        const data = this.state.statsData;
+        const sessions = this.state.processedSessions;
+
+        if (!data || !sessions) {
+          content.innerHTML = '<div class="loading">No data available</div>';
+          return;
+        }
+
+        // Calculate Phase 1 & 2 analytics
+        const studentsNeedingAttention = this.getStudentsNeedingAttention();
+        const challengingUnits = this.getMostChallengingUnits();
+        const modeEffectiveness = this.getModeEffectiveness();
+        const peakTimes = this.getPeakUsageTimes();
+        const engagement = this.getEngagementMetrics();
+
+        // OPTIMIZATION: Build HTML structure once
+        content.innerHTML = `
+          ${this.renderStudentsNeedingAttention(studentsNeedingAttention)}
+          ${this.renderRecommendations(studentsNeedingAttention, challengingUnits, engagement, peakTimes)}
+          <div class="section">
+            <h2>📈 Overview</h2>
+            <p style="color: #6b7280; margin-bottom: 16px;">Generated at: ${data.generated_at}</p>
+
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value">${data.summary.total_unique_users}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Total Sessions</div>
+                <div class="stat-value">${data.summary.total_sessions}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Problems Solved</div>
+                <div class="stat-value">${data.summary.total_problems_solved}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Avg Session Time</div>
+                <div class="stat-value">${data.summary.average_session_minutes}<span style="font-size: 16px; color: #6b7280;"> min</span></div>
+              </div>
+            </div>
+          </div>
+
+          ${this.renderRecentActivity(sessions)}
+          ${this.renderEngagementMetrics(engagement)}
+          ${this.renderMostChallengingUnits(challengingUnits)}
+          ${this.renderModeEffectiveness(modeEffectiveness)}
+          ${this.renderPeakUsageTimes(peakTimes)}
+
+          <div class="section">
+            <h2>👥 Active Users by Time Period</h2>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-label">Past 7 Days</div>
+                <div class="stat-value">${this.getUniqueUserCount(sessions.past7Days)}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Past 14 Days</div>
+                <div class="stat-value">${this.getUniqueUserCount(sessions.past14Days)}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Past 30 Days</div>
+                <div class="stat-value">${this.getUniqueUserCount(sessions.past30Days)}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Past 60 Days</div>
+                <div class="stat-value">${this.getUniqueUserCount(sessions.past60Days)}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Archived (90+)</div>
+                <div class="stat-value">${this.getUniqueUserCount(sessions.archived90Plus)}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>📚 Usage by Unit</h2>
+            ${this.renderTable(data.by_unit, 'Unit', 'Sessions')}
+          </div>
+
+          <div class="section">
+            <h2>🎯 Usage by Support Level</h2>
+            ${this.renderTable(data.by_support_level, 'Support Level', 'Sessions')}
+          </div>
+
+          <div class="section">
+            <h2>💡 Help Features Used</h2>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-label">Total Hints</div>
+                <div class="stat-value">${data.help_usage.total_hints_requested}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">"Show Me Why" Clicks</div>
+                <div class="stat-value">${data.help_usage.total_why_requested}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Avg Hints/Session</div>
+                <div class="stat-value">${data.help_usage.average_hints_per_session.toFixed(1)}</div>
+              </div>
+            </div>
+          </div>
+
+          ${this.renderSessionHistory(sessions)}
+        `;
+
+        // Restore accordion states
+        this.restoreAccordionStates();
+      },
+
+      renderTable(data, col1Header, col2Header) {
+        if (!data || Object.keys(data).length === 0) {
+          return '<div class="empty-state">No data available</div>';
+        }
+
+        const rows = Object.entries(data)
+          .sort((a, b) => b[1] - a[1])
+          .map(([key, value]) => `
+            <tr>
+              <td><strong>${this.escapeHtml(key)}</strong></td>
+              <td>${value}</td>
+            </tr>
+          `).join('');
+
+        return `
+          <table>
+            <thead>
+              <tr>
+                <th>${col1Header}</th>
+                <th>${col2Header}</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        `;
+      },
+
+      renderStudentsNeedingAttention(students) {
+        if (students.length === 0) {
+          return `
+            <div class="section">
+              <h2>✅ All Students Performing Well</h2>
+              <p style="color: #6b7280;">No students currently flagged as needing attention. Great!</p>
+            </div>
+          `;
+        }
+
+        const cards = students.map(session => {
+          const user = this.state.fullData.users?.[session.user_token];
+          const userName = this.escapeHtml(user?.name || 'Anonymous');
+          const wrong = session.wrong_responses || session.incorrect_count || 0;
+          const duration = session.duration_seconds ? Math.round(session.duration_seconds / 60) : 0;
+          const daysAgo = Math.floor((Date.now() - new Date(session.started).getTime()) / (1000 * 60 * 60 * 24));
+
+          let reason = '';
+          if (wrong >= 7) reason = `${wrong} wrong responses (high struggle)`;
+          else if (wrong >= 5) reason = `${wrong} wrong responses`;
+          else if (duration >= 45) reason = `${duration} min session (may be stuck)`;
+          else if (duration >= 30) reason = `${duration} min session`;
+
+          const timeAgo = daysAgo === 0 ? 'Today' : daysAgo === 1 ? 'Yesterday' : `${daysAgo} days ago`;
+
+          return `
+            <div class="alert-card">
+              <div class="student-name">${userName}</div>
+              <div class="alert-reason">${session.module || 'Unknown Unit'}, ${reason}</div>
+              <div class="alert-date">${timeAgo}</div>
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div class="alert-section">
+            <h2>🚨 Students Needing Attention (${students.length})</h2>
+            <div class="alert-grid">
+              ${cards}
+            </div>
+          </div>
+        `;
+      },
+
+      renderRecommendations(students, challengingUnits, engagement, peakTimes) {
+        const recommendations = [];
+
+        // Student-specific recommendations
+        if (students.length > 0) {
+          const topStudents = students.slice(0, 3).map(s => {
+            const user = this.state.fullData.users?.[s.user_token];
+            return this.escapeHtml(user?.name || 'Anonymous');
+          });
+          recommendations.push({
+            category: 'REACH OUT TO',
+            text: `Consider 1-on-1 help for: ${topStudents.join(', ')}`
+          });
+        }
+
+        // Unit-specific recommendations
+        if (challengingUnits.length > 0 && challengingUnits[0].avgWrong > 3) {
+          const hardestUnit = challengingUnits[0];
+          recommendations.push({
+            category: 'TEACHING FOCUS',
+            text: `${hardestUnit.unit} is proving challenging (avg ${hardestUnit.avgWrong.toFixed(1)} wrong responses) - consider additional scaffolding or examples`
+          });
+        }
+
+        // Engagement recommendations
+        if (engagement.returnRate >= 75) {
+          recommendations.push({
+            category: 'SUCCESS STORY',
+            text: `${engagement.returnRate}% of students return after first session - the tutor is engaging!`
+          });
+        } else if (engagement.returnRate < 50) {
+          recommendations.push({
+            category: 'ENGAGEMENT CONCERN',
+            text: `Only ${engagement.returnRate}% of students return - consider survey to understand why`
+          });
+        }
+
+        // Peak time recommendations
+        if (peakTimes.length > 0 && peakTimes[0].count >= 5) {
+          const peak = peakTimes[0];
+          recommendations.push({
+            category: 'OFFICE HOURS',
+            text: `Peak usage is ${peak.timeRange} - consider scheduling virtual office hours then`
+          });
+        }
+
+        if (recommendations.length === 0) {
+          return '';
+        }
+
+        const items = recommendations.map(r => `
+          <div class="recommendation-item">
+            <strong>${r.category}:</strong>
+            ${r.text}
+          </div>
+        `).join('');
+
+        return `
+          <div class="recommendations-section">
+            <h2>💡 Auto-Generated Recommendations</h2>
+            ${items}
+          </div>
+        `;
+      },
+
+      renderRecentActivity(sessions) {
+        // Get most recent 20 sessions across all categories
+        const allActiveSessions = [
+          ...sessions.past7Days,
+          ...sessions.past14Days,
+          ...sessions.past30Days,
+          ...sessions.past60Days
+        ];
+
+        // Remove duplicates and sort by most recent
+        const uniqueSessions = Array.from(
+          new Map(allActiveSessions.map(s => [s.id, s])).values()
+        ).sort((a, b) => new Date(b.started) - new Date(a.started));
+
+        const recentSessions = uniqueSessions.slice(0, 20);
+
+        if (recentSessions.length === 0) {
+          return `
+            <div class="section">
+              <h2>📋 Recent Activity</h2>
+              <p style="color: #6b7280;">No recent sessions</p>
+            </div>
+          `;
+        }
+
+        const rows = recentSessions.map(session => {
+          const user = this.state.fullData.users?.[session.user_token];
+          const userName = this.escapeHtml(user?.name || 'Anonymous');
+          const duration = session.duration_seconds
+            ? Math.round(session.duration_seconds / 60)
+            : 'In progress';
+          const startDate = new Date(session.started);
+          const dateStr = startDate.toLocaleDateString();
+          const timeStr = startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          return `
+            <tr>
+              <td><strong>${userName}</strong></td>
+              <td>${this.escapeHtml(session.module || 'Unknown')}</td>
+              <td>${this.escapeHtml(session.mode || 'Standard')}</td>
+              <td>${dateStr}</td>
+              <td>${timeStr}</td>
+              <td>${duration}${typeof duration === 'number' ? ' min' : ''}</td>
+            </tr>
+          `;
+        }).join('');
+
+        return `
+          <div class="section">
+            <h2>📋 Recent Activity (Last 20 Sessions)</h2>
+            <p style="color: #6b7280; margin-bottom: 12px; font-size: 14px;">
+              Simple list of who used the tutor and when - for reporting purposes
+            </p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Unit</th>
+                  <th>Mode</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Duration</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+            </table>
+          </div>
+        `;
+      },
+
+      renderEngagementMetrics(engagement) {
+        return `
+          <div class="section">
+            <h2>🔄 Student Engagement (Past 30 Days)</h2>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value">${engagement.totalUsers}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Return Rate</div>
+                <div class="stat-value">${engagement.returnRate}%
+                  ${engagement.returnRate >= 75 ? '<span class="insight-badge">Excellent</span>' :
+                    engagement.returnRate >= 50 ? '<span class="insight-badge info">Good</span>' :
+                    '<span class="insight-badge warning">Needs Work</span>'}
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Repeat Users</div>
+                <div class="stat-value">${engagement.repeatUsers}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">One-Time Users</div>
+                <div class="stat-value">${engagement.oneTimeUsers}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Avg Sessions/Student</div>
+                <div class="stat-value">${engagement.avgSessionsPerUser}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      },
+
+      renderMostChallengingUnits(units) {
+        if (units.length === 0) {
+          return '';
+        }
+
+        const rows = units.map((unit, index) => {
+          let difficultyClass = 'low';
+          let difficultyPercent = 30;
+          if (unit.avgWrong > 4) {
+            difficultyClass = 'high';
+            difficultyPercent = 90;
+          } else if (unit.avgWrong > 2.5) {
+            difficultyClass = 'medium';
+            difficultyPercent = 60;
+          }
+
+          const statusColor = unit.avgWrong >= 5 ? 'red' : unit.avgWrong >= 3 ? 'orange' : unit.avgWrong >= 2 ? 'yellow' : 'green';
+
+          return `
+            <tr>
+              <td><strong>${index + 1}</strong></td>
+              <td>
+                <span class="status-indicator status-${statusColor}"></span>
+                <strong>${this.escapeHtml(unit.unit)}</strong>
+              </td>
+              <td>${unit.avgWrong.toFixed(1)}</td>
+              <td>${unit.avgHints.toFixed(1)}</td>
+              <td>${unit.avgDuration} min</td>
+              <td>${unit.sessionCount}</td>
+              <td>
+                <div class="difficulty-bar">
+                  <div class="difficulty-fill ${difficultyClass}" style="width: ${difficultyPercent}%"></div>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        return `
+          <div class="section">
+            <h2>📉 Most Challenging Units (Past 30 Days)</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Unit</th>
+                  <th>Avg Wrong</th>
+                  <th>Avg Hints</th>
+                  <th>Avg Time</th>
+                  <th>Sessions</th>
+                  <th>Difficulty</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+            </table>
+          </div>
+        `;
+      },
+
+      renderModeEffectiveness(modes) {
+        if (modes.length === 0) {
+          return '';
+        }
+
+        const rows = modes.map(mode => {
+          const statusColor = mode.avgWrong >= 4 ? 'red' : mode.avgWrong >= 2.5 ? 'orange' : mode.avgWrong >= 1.5 ? 'yellow' : 'green';
+          const successBadge = mode.successRate >= 85 ? 'Excellent' : mode.successRate >= 70 ? 'Good' : mode.successRate >= 50 ? 'Fair' : 'Needs Review';
+          const badgeClass = mode.successRate >= 85 ? '' : mode.successRate >= 70 ? 'info' : 'warning';
+
+          return `
+            <tr>
+              <td>
+                <span class="status-indicator status-${statusColor}"></span>
+                <strong>${this.escapeHtml(mode.mode)}</strong>
+              </td>
+              <td>${mode.avgWrong}</td>
+              <td>${mode.avgHints}</td>
+              <td>${mode.avgDuration} min</td>
+              <td>${mode.sessionCount}</td>
+              <td>${mode.successRate}% <span class="insight-badge ${badgeClass}">${successBadge}</span></td>
+            </tr>
+          `;
+        }).join('');
+
+        return `
+          <div class="section">
+            <h2>🎯 Mode Effectiveness Comparison (Past 30 Days)</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Mode</th>
+                  <th>Avg Wrong</th>
+                  <th>Avg Hints</th>
+                  <th>Avg Time</th>
+                  <th>Sessions</th>
+                  <th>Success Rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+            </table>
+            <p style="color: #6b7280; margin-top: 12px; font-size: 13px;">
+              <strong>Note:</strong> Success rate based on completed sessions. Higher success may correlate with longer time investment.
+            </p>
+          </div>
+        `;
+      },
+
+      renderPeakUsageTimes(peaks) {
+        if (peaks.length === 0 || peaks[0].count === 0) {
+          return '';
+        }
+
+        const maxCount = peaks[0].count;
+        const rows = peaks.map(peak => {
+          const barWidth = (peak.count / maxCount) * 100;
+          return `
+            <tr>
+              <td><strong>${peak.timeRange}</strong></td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="flex: 1; height: 24px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                    <div style="height: 100%; background: #3b82f6; width: ${barWidth}%; border-radius: 4px;"></div>
+                  </div>
+                  <strong style="min-width: 40px; text-align: right;">${peak.count}</strong>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        return `
+          <div class="section">
+            <h2>⏰ Peak Usage Times (Past 7 Days)</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Time Range</th>
+                  <th>Sessions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+            </table>
+            <p style="color: #6b7280; margin-top: 12px; font-size: 13px;">
+              💡 <strong>Tip:</strong> Consider scheduling office hours during peak usage times for maximum impact.
+            </p>
+          </div>
+        `;
+      },
+
+      renderSessionHistory(sessions) {
+        return `
+          <div class="section">
+            <h2>📝 Session History</h2>
+
+            ${this.renderAccordion(0, '📅 Past 7 Days', sessions.past7Days)}
+            ${this.renderAccordion(1, '📆 Past 14 Days', sessions.past14Days)}
+            ${this.renderAccordion(2, '📊 Past 30 Days', sessions.past30Days)}
+            ${this.renderAccordion(3, '📈 Past 60 Days', sessions.past60Days)}
+            ${this.renderAccordion(4, '👥 Colleagues (Faculty/Staff)', sessions.colleagues, true)}
+            ${this.renderAccordion(5, '🎓 Student Collaborators (David, Kavin)', sessions.studentCollaborators, true)}
+            ${this.renderAccordion(6, '🗄️ Archived (90+ Days, Max 100)', sessions.archived90Plus)}
+          </div>
+        `;
+      },
+
+      // OPTIMIZATION: Lazy loading - only render table when accordion opens
+      renderAccordion(index, title, sessions, showRole = false) {
+        const isActive = this.state.accordionStates[index];
+        const filteredSessions = this.filterSessionsList(sessions);
+
+        return `
+          <div class="accordion-item">
+            <div class="accordion-header ${isActive ? 'active' : ''}"
+                 id="accordion-header-${index}"
+                 onclick="app.toggleAccordion(${index})">
+              <span class="accordion-title">${title}</span>
+              <span class="accordion-count">${filteredSessions.length}</span>
+            </div>
+            <div class="accordion-content ${isActive ? 'active' : ''}" id="accordion-content-${index}">
+              ${isActive ? this.renderSessionTable(filteredSessions, showRole) : ''}
+            </div>
+          </div>
+        `;
+      },
+
+      renderSessionTable(sessions, showRole = false) {
+        if (sessions.length === 0) {
+          return '<div class="empty-state">No sessions in this period</div>';
+        }
+
+        const rows = sessions.map(session => this.createSessionRow(session, showRole)).join('');
+
+        return `
+          <table>
+            <thead>
+              <tr>
+                <th>Student Name</th>
+                <th>Unit</th>
+                <th>Mode</th>
+                <th>Time Spent</th>
+                <th>Hints</th>
+                <th>Calculator Use</th>
+                <th>Wrong Responses</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        `;
+      },
+
+      createSessionRow(session, showRole = false) {
+        const user = this.state.fullData.users?.[session.user_token];
+        const userName = this.escapeHtml(user?.name || 'Anonymous');
+        const duration = session.duration_seconds
+          ? Math.round(session.duration_seconds / 60)
+          : 'In progress';
+
+        const roleInfo = showRole && session.collaborator
+          ? `<br><span style="color: #059669; font-size: 12px; font-weight: 600;">${this.escapeHtml(session.collaborator_role || 'Collaborator')}</span>`
+          : '';
+
+        // Get session data with fallbacks
+        const hints = session.hints_requested || session.hint_count || 0;
+        const calculatorUse = session.calculator_used || session.calculator_count || 0;
+        const wrongResponses = session.wrong_responses || session.incorrect_count || 0;
+
+        // Color-coded status based on wrong responses
+        let statusColor = 'green';
+        let statusText = 'Good';
+        if (wrongResponses >= 7) {
+          statusColor = 'red';
+          statusText = 'High struggle';
+        } else if (wrongResponses >= 5) {
+          statusColor = 'orange';
+          statusText = 'Needs support';
+        } else if (wrongResponses >= 3) {
+          statusColor = 'yellow';
+          statusText = 'Watch';
+        }
+
+        return `
+          <tr data-search="${userName.toLowerCase()} ${(session.module || '').toLowerCase()} ${(session.mode || '').toLowerCase()}">
+            <td>
+              <span class="status-indicator status-${statusColor}"></span>
+              <strong>${userName}</strong>${roleInfo}
+            </td>
+            <td>${this.escapeHtml(session.module || 'Unknown')}</td>
+            <td>${this.escapeHtml(session.mode || 'Standard')}</td>
+            <td>${duration}${typeof duration === 'number' ? ' min' : ''}</td>
+            <td>${hints}</td>
+            <td>${calculatorUse}</td>
+            <td>
+              ${wrongResponses}
+              ${wrongResponses >= 5 ? `<span class="status-text">(${statusText})</span>` : ''}
+            </td>
+          </tr>
+        `;
+      },
+
+      renderError(message) {
+        document.getElementById('content').innerHTML = `
+          <div class="error">
+            <strong>Error loading data:</strong> ${this.escapeHtml(message)}
+          </div>
+        `;
+      },
+
+      // ═══════════════════════════════════════════════════════════════
+      // ACCORDION MANAGEMENT (with state preservation)
+      // ═══════════════════════════════════════════════════════════════
+
+      toggleAccordion(index) {
+        this.state.accordionStates[index] = !this.state.accordionStates[index];
+
+        const header = document.getElementById(`accordion-header-${index}`);
+        const content = document.getElementById(`accordion-content-${index}`);
+
+        header.classList.toggle('active');
+        content.classList.toggle('active');
+
+        // OPTIMIZATION: Lazy load table content when opening
+        if (this.state.accordionStates[index] && content.innerHTML.trim() === '') {
+          const categories = ['past7Days', 'past14Days', 'past30Days', 'past60Days', 'collaborators', 'archived90Plus'];
+          const sessions = this.state.processedSessions[categories[index]];
+          const showRole = index === 4; // Collaborators
+          const filteredSessions = this.filterSessionsList(sessions);
+          content.innerHTML = this.renderSessionTable(filteredSessions, showRole);
+        }
+      },
+
+      restoreAccordionStates() {
+        this.state.accordionStates.forEach((isActive, index) => {
+          if (isActive) {
+            const header = document.getElementById(`accordion-header-${index}`);
+            const content = document.getElementById(`accordion-content-${index}`);
+            if (header && content) {
+              header.classList.add('active');
+              content.classList.add('active');
+            }
+          }
+        });
+      },
+
+      // ═══════════════════════════════════════════════════════════════
+      // SEARCH/FILTER
+      // ═══════════════════════════════════════════════════════════════
+
+      filterSessions() {
+        const query = document.getElementById('searchBox').value.toLowerCase();
+        this.state.searchQuery = query;
+
+        // Re-render to apply filter
+        this.render();
+      },
+
+      filterSessionsList(sessions) {
+        if (!this.state.searchQuery) return sessions;
+
+        return sessions.filter(session => {
+          const user = this.state.fullData.users?.[session.user_token];
+          const userName = (user?.name || 'Anonymous').toLowerCase();
+          const module = (session.module || '').toLowerCase();
+          const mode = (session.mode || '').toLowerCase();
+
+          return userName.includes(this.state.searchQuery) ||
+                 module.includes(this.state.searchQuery) ||
+                 mode.includes(this.state.searchQuery);
+        });
+      },
+
+      // ═══════════════════════════════════════════════════════════════
+      // AUTO-REFRESH
+      // ═══════════════════════════════════════════════════════════════
+
+      toggleAutoRefresh() {
+        const checkbox = document.getElementById('autoRefreshToggle');
+
+        if (checkbox.checked) {
+          // Start auto-refresh (30 minutes)
+          this.state.autoRefreshInterval = setInterval(() => {
+            this.refresh();
+          }, 1800000); // 30 minutes = 30 * 60 * 1000
+          console.log('Auto-refresh enabled (30 min)');
+        } else {
+          // Stop auto-refresh
+          if (this.state.autoRefreshInterval) {
+            clearInterval(this.state.autoRefreshInterval);
+            this.state.autoRefreshInterval = null;
+          }
+          console.log('Auto-refresh disabled');
+        }
+      },
+
+      // ═══════════════════════════════════════════════════════════════
+      // MANUAL REFRESH (Debounced)
+      // ═══════════════════════════════════════════════════════════════
+
+      async refresh() {
+        await this.loadData(true); // Force refresh (bypass cache)
+      },
+
+      updateRefreshButton(isRefreshing) {
+        const btn = document.getElementById('refreshBtn');
+        const text = document.getElementById('refreshText');
+
+        if (isRefreshing) {
+          btn.disabled = true;
+          text.innerHTML = '<span class="spinner"></span> Refreshing...';
+        } else {
+          btn.disabled = false;
+          text.innerHTML = '🔄 Refresh Data';
+        }
+      },
+
+      updateLastUpdatedTime() {
+        const elem = document.getElementById('lastUpdated');
+        if (this.state.lastFetch) {
+          const time = new Date(this.state.lastFetch).toLocaleTimeString();
+          elem.textContent = `Last updated: ${time}`;
+        }
+      },
+
+      // ═══════════════════════════════════════════════════════════════
+      // EXPORT TO CSV
+      // ═══════════════════════════════════════════════════════════════
+
+      exportToCSV() {
+        if (!this.state.processedSessions) {
+          alert('No data to export');
+          return;
+        }
+
+        // Combine all sessions
+        const allSessions = [
+          ...this.state.processedSessions.past7Days,
+          ...this.state.processedSessions.past14Days,
+          ...this.state.processedSessions.past30Days,
+          ...this.state.processedSessions.past60Days,
+          ...this.state.processedSessions.collaborators,
+          ...this.state.processedSessions.archived90Plus
+        ];
+
+        // Remove duplicates (sessions may appear in multiple categories)
+        const uniqueSessions = Array.from(
+          new Map(allSessions.map(s => [s.id, s])).values()
+        );
+
+        // Build CSV with new columns
+        const headers = ['Student Name', 'Unit', 'Mode', 'Time Spent (min)', 'Hints', 'Calculator Use', 'Wrong Responses', 'Type'];
+        const rows = uniqueSessions.map(session => {
+          const user = this.state.fullData.users?.[session.user_token];
+          const userName = user?.name || 'Anonymous';
+          const duration = session.duration_seconds
+            ? Math.round(session.duration_seconds / 60)
+            : '';
+
+          let type = 'Active';
+          if (session.collaborator) type = 'Collaborator';
+          else {
+            const sessionDate = new Date(session.started);
+            const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+            if (sessionDate < ninetyDaysAgo) type = 'Archived (90+)';
+          }
+
+          return [
+            userName,
+            session.module || 'Unknown',
+            session.mode || 'Standard',
+            duration,
+            session.hints_requested || session.hint_count || 0,
+            session.calculator_used || session.calculator_count || 0,
+            session.wrong_responses || session.incorrect_count || 0,
+            type
+          ];
+        });
+
+        const csv = [
+          headers.join(','),
+          ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ].join('\n');
+
+        // Download
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `usage-report-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        console.log(`Exported ${uniqueSessions.length} sessions to CSV`);
+      },
+
+      // ═══════════════════════════════════════════════════════════════
+      // UTILITIES
+      // ═══════════════════════════════════════════════════════════════
+
+      getUniqueUserCount(sessions) {
+        if (!sessions || sessions.length === 0) return 0;
+        const uniqueTokens = new Set(sessions.map(s => s.user_token));
+        return uniqueTokens.size;
+      },
+
+      escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+    };
+
+    // Initialize app on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      app.init();
+    });
+  </script>
+</body>
+</html>
