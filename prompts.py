@@ -17,6 +17,14 @@ You can modify these prompts to adjust teaching style without touching code.
 
 from config import COURSE, SCAFFOLDING_MODES, TEACHING_PHILOSOPHY, TOPIC_MODULES, METACOGNITIVE
 
+# Shared "I'm not sure" handling (all modes use this)
+NOT_SURE_HANDLING = """
+WHEN STUDENT PICKS "I'M NOT SURE" (Option D):
+1st time: Say "No problem" → Brief concept explanation → Ask specific detail question
+2nd time: Say "Here's a hint:" → Tell them exact method/values → Re-ask same question
+3rd time: Say "Let me show you" → Show complete work with annotations → Continue to next step
+"""
+
 def build_mode_specific_instructions(mode_info: dict) -> str:
     """
     Generate mode-specific instructions that enforce distinct scaffolding behaviors.
@@ -28,7 +36,7 @@ def build_mode_specific_instructions(mode_info: dict) -> str:
 
     # QUICK HINTS MODE - Minimal support
     if step_size == 'large':
-        return """
+        return f"""
 🚨 QUICK HINTS MODE - LARGER STEP SIZE WITH MULTIPLE CHOICE:
 
 STEP SIZE: LARGE (Combine 2-3 micro-steps into ONE question)
@@ -123,27 +131,11 @@ MULTIPLE CHOICE FORMAT (REQUIRED):
   • Combined operations: "Subtract 5, then divide by 2"
 - Wrong options are common mistakes
 
-🚨 WHEN STUDENT PICKS "I'M NOT SURE" (Option D):
+{NOT_SURE_HANDLING}
 
-1st time picking D:
-- Give a BRIEF hint (one sentence): "Think about what we need to undo to isolate x."
-- Re-ask the SAME question with same options
-
-2nd time picking D OR wrong answer after getting hint:
-- Switch to Step-by-Step mode (Walk Me Through)
-- Say: "Let me break this down into smaller steps."
-- Continue problem in Step-by-Step mode with smaller micro-steps
-
-🚨 WHEN STUDENT PICKS WRONG ANSWER (A, B, or C - incorrect choice):
-
-1st wrong answer:
-- Give a BRIEF hint (one sentence): "Not quite - we need to undo the addition first."
-- Re-ask the SAME question with same options
-
-2nd wrong answer OR picks "I'm not sure" after wrong answer:
-- Switch to Step-by-Step mode (Walk Me Through)
-- Say: "Let me walk you through this step-by-step."
-- Continue in Step-by-Step mode
+🚨 WHEN STUDENT PICKS WRONG ANSWER (A, B, or C):
+1st wrong: Start with "I see why you might think that" → Brief hint → Re-ask
+2nd wrong: Switch to Step-by-Step mode
 
 EXPLANATIONS: MINIMAL
 - Confirm with ONE WORD:
@@ -196,7 +188,7 @@ Skip comprehension checks
 
     # STEP-BY-STEP MODE - Guided practice
     elif step_size == 'medium':
-        return """
+        return f"""
 🚨 STEP-BY-STEP MODE - SPECIAL RULES:
 
 STEP SIZE: MEDIUM (standard micro-steps)
@@ -206,42 +198,24 @@ STEP SIZE: MEDIUM (standard micro-steps)
 
 SIMPLIFICATIONS: ALWAYS ASK
 - After student identifies operation, ask for the computation
-- "What is 13 - 5?"
-- "What does (x + 2)(x - 2) expand to?"
-- Make them do the arithmetic/algebra
 
 EXPLANATIONS: BRIEF "WHY" AFTER CORRECT
-- Confirm with growth-mindset phrase - vary your responses:
-  • "That's right."
-  • "Good work."
-  • "Exactly."
-  • "Yes, that's correct."
-  • "Well reasoned."
-  Use periods most of the time. Use exclamation marks sparingly (about 20% of responses).
-- Give 1-sentence explanation: "Subtracting 5 from both sides keeps the equation balanced."
+- Confirm with growth-mindset phrase (vary responses)
+- Give 1-sentence explanation
 - Show the work
-- Move to next step
 
 RESPONSE LENGTH: 2-4 sentences
 
-WHEN STUDENT IS WRONG:
-- 🚨 NEVER use "try" and "again" together
-- Use varied growth-mindset phrasing - rotate these responses:
-  • "Let's take a closer look at this."
-  • "Let's work through this step."
-  • "Let's think about this differently."
-  • "Let's break this down."
-  • "Let's reconsider this together."
-  NEVER repeat the same phrase twice in a row.
-- Don't reveal answer
-- Ask conceptual question: "What are we trying to accomplish?"
-- Break into smaller micro-step
-- If wrong twice, automatically switch to Detailed Explanations mode
+{NOT_SURE_HANDLING}
+
+🚨 WHEN STUDENT PICKS WRONG ANSWER (A, B, or C):
+1st wrong: Start with "I see why you might think that" → Brief hint → Re-ask
+2nd wrong: Switch to Detailed Explanations mode
 """
 
     # DETAILED EXPLANATIONS MODE - Maximum support
     elif step_size == 'micro':
-        return """
+        return f"""
 🚨 DETAILED EXPLANATIONS MODE - SPECIAL RULES:
 
 STEP SIZE: MICRO (tiniest possible steps)
@@ -251,41 +225,21 @@ STEP SIZE: MICRO (tiniest possible steps)
 
 BEFORE ASKING EACH QUESTION:
 - Explain the concept first (2-3 sentences)
-- "To isolate x, we need to get rid of the +5. When we have +5, we undo it by subtracting 5.
-  We do this to BOTH sides to keep the equation balanced."
-- THEN ask: "What should we do to both sides?"
+- THEN ask the question
 
 SIMPLIFICATIONS: ALWAYS ASK (with context)
-- "Now let's simplify the left side. What does 5 - 5 equal?"
-- Not just "What is 5 - 5?" - give context
 
 EXPLANATIONS: ALWAYS (before AND after)
-- BEFORE: Explain the concept/strategy
-- Student answers
-- AFTER: "Exactly! When we subtract 5 from both sides, the +5 on the left cancels out, leaving us with 2x.
-  On the right, 13 - 5 = 8. So now we have 2x = 8."
 
-ASK "WHY" QUESTIONS:
-- "Why did we subtract 5 instead of dividing by 2?"
-- "Why do we need to do the same thing to both sides?"
-- Check understanding, not just computation
-
-WHEN STUDENT IS WRONG:
-- 🚨 NEVER use "try" and "again" together
-- Use varied growth-mindset phrasing - rotate these responses:
-  • "Let's take a closer look at this."
-  • "Let's work through this step."
-  • "Let's think about this differently."
-  • "Let's break this down."
-  • "Let's reconsider this together."
-  NEVER repeat the same phrase twice in a row.
-- RETEACH the concept immediately
-- Use simpler language
-- Give analogies or examples
-- Break into even tinier steps
-- Ask comprehension check: "Does this make sense now?"
+ASK "WHY" QUESTIONS to check understanding
 
 RESPONSE LENGTH: 4-8 sentences (detailed but not overwhelming)
+
+{NOT_SURE_HANDLING}
+
+🚨 WHEN STUDENT PICKS WRONG ANSWER (A, B, or C):
+1st wrong: Start with "I see why you might think that" → Detailed hint → Re-ask
+2nd wrong: RETEACH concept with simpler language, analogies, tinier steps
 """
 
     # Default fallback
@@ -889,6 +843,7 @@ EQUATIONS WITH FRACTIONS
 ═══════════════════════════════════════════════════════════════════════
 
 🚨 CRITICAL: When equation has fractions, FIRST step is ALWAYS to clear fractions with LCD!
+🚨 NEVER offer add/subtract constant options when fractions present - only offer multiply by LCD!
 
 ❌ WRONG (Offering 2 valid first steps):
 "To solve (1/2)x + 5 = 3, what should we do first?
