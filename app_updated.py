@@ -8,6 +8,10 @@ CHANGES IN THIS VERSION:
 ✅ Added calculator_used tracking (tracks actual button clicks)
 ✅ Added completed/final_answer_correct tracking (marks problem completion)
 ✅ Added /api/session/calculator-used endpoint for frontend tracking
+✅ Updated Quick Hints mode to ALWAYS use multiple choice (A, B, C, D format)
+✅ Fixed Quick Hints scaffolding: D is always "I'm not sure", proper fallback to Step-by-Step
+✅ Improved answer validation to accept equivalent forms (fractions, decimals, etc.)
+✅ Enhanced mode enforcement reminders for better AI compliance
 
 Configuration is in config.py, teaching prompts in prompts.py
 ═══════════════════════════════════════════════════════════════════════════════
@@ -51,7 +55,13 @@ from fast_validator import FastValidator
 
 # Mode enforcement reminders (injected as last message for recency bias)
 MODE_REMINDERS = {
-    "quick_hints": "🚨 QUICK HINTS MODE: Show complete simplified results. NEVER ask simplification questions like 'What is 22-7?'",
+    "quick_hints": """🚨 QUICK HINTS MODE CRITICAL RULES:
+• ALWAYS use multiple choice format (A, B, C, D)
+• D is ALWAYS "I'm not sure" (NEVER the correct answer)
+• Show clean results only (NO intermediate arithmetic like "2x + 5 - 5 = 13 - 5")
+• NEVER ask simplification questions
+• Accept equivalent answers (1/2 = 0.5, √16 = 4, etc.)
+• If student picks D or wrong answer twice → switch to Step-by-Step mode""",
     "step_by_step": "🚨 STEP-BY-STEP MODE: Ask for operation, then ask for simplification separately. Give brief why after correct.",
     "detailed_explanations": "🚨 DETAILED MODE: Explain concept BEFORE each question. Break into tiniest steps. Ask WHY questions to check understanding. Reteach when wrong."
 }
